@@ -1,296 +1,253 @@
-package manager;
+package ru.yandex.tasktracker.service;
 
-import status.Status;
-import tasks.Epic;
-import tasks.Subtask;
-import tasks.Task;
+import ru.yandex.tasktracker.issue.*;
 
 import java.util.*;
 
-public class InMemoryTaskManager implements TaskManager {
-    private static int id = 0;
+public class TaskManager implements ITaskManager {
+    private static Integer id = 0;
 
-    private final Map<Integer, Task> tasks = new HashMap<>();
-    private final Map<Integer, Subtask> subtasks = new HashMap<>();
     private final Map<Integer, Epic> epics = new HashMap<>();
+    private final Map<Integer, Task> tasks = new HashMap<>();
+    private final Map<Integer, SubTask> subTasks = new HashMap<>();
     private final HistoryManager historyManager;
 
-    public InMemoryTaskManager(HistoryManager historyManager) {
+    public TaskManager(HistoryManager historyManager) {
         this.historyManager = historyManager;
     }
 
-    public int generateId() {
+    private Integer nextId() {
         return ++id;
     }
 
-    @Override
-    public int createTask(Task task) {
-        int newTaskId = generateId();
-        task.setId(newTaskId);
-        tasks.put(newTaskId, task);
-        return newTaskId;
-    }
+    public Integer createIssue(Issue issue) {
+        if (issue instanceof Epic) {
+            Epic epic = (Epic) issue;
+            Integer newId = nextId();
+            epics.put(newId, epic);
+            System.out.println("Создан Epic " + newId);
+            return newId;
+        } else if (issue instanceof Task) {
+            Task task = (Task) issue;
+            Integer newId = nextId();
+            tasks.put(newId, task);
+            System.out.println("Создан Task " + newId);
+            return newId;
+        } else if (issue instanceof SubTask) {
+            SubTask subTask = (SubTask) issue;
+            Integer epicId = subTask.getEpicId();
 
-    @Override
-    public int createEpic(Epic epic) {
-        int newEpicId = generateId();
-        epic.setId(newEpicId);
-        epics.put(newEpicId, epic);
-        return newEpicId;
-    }
-
-    @Override
-    public int createSubtask(Subtask subtask) {
-        int newSubtaskId = generateId();
-        subtask.setId(newSubtaskId);
-        Epic epic = epics.get(subtask.getEpicId());
-        if (epic != null) {
-            subtasks.put(newSubtaskId, subtask);
-            epic.setSubtaskIds(newSubtaskId);
-            updateStatusEpic(epic);
-            return newSubtaskId;
-        } else {
-            System.out.println("Epic not found");
-            return -1;
-        }
-    }
-
-    @Override
-    public void deleteTaskById(int id) {
-        if (tasks.containsKey(id)) {
-            tasks.remove(id);
-        } else {
-            System.out.println("Task not found");
-        }
-    }
-
-    @Override
-    public void deleteEpicById(int id) {
-        Epic epic = epics.get(id);
-        if (epic != null) {
-            for (Integer subtaskId : epic.getSubtaskIds()) {
-                subtasks.remove(subtaskId);
-            }
-            epics.remove(id);
-        } else {
-            System.out.println("Epic not found");
-        }
-    }
-
-    @Override
-    public void deleteSubtaskById(int id) {
-        Subtask subtask = subtasks.get(id);
-        if (subtask != null) {
-            Epic epic = epics.get(subtask.getEpicId());
-            epic.getSubtaskIds().remove((Integer) subtask.getId());
-            updateStatusEpic(epic);
-            subtasks.remove(id);
-        } else {
-            System.out.println("Subtask not found");
-        }
-    }
-
-    @Override
-    public void deleteAllTasks() {
-        tasks.clear();
-    }
-
-    @Override
-    public void deleteAllEpics() {
-        subtasks.clear();
-        epics.clear();
-    }
-
-    @Override
-    public void deleteAllSubtasks() {
-        subtasks.clear();
-        for (Epic epic : epics.values()) {
-            epic.getSubtaskIds().clear();
-            updateStatusEpic(epic);
-        }
-    }
-
-    @Override
-    public Task getTaskById(int id) {
-        historyManager.add(tasks.get(id));
-        return tasks.get(id);
-    }
-
-    @Override
-    public Epic getEpicById(int id) {
-        historyManager.add(epics.get(id));
-        return epics.get(id);
-    }
-
-    @Override
-    public Subtask getSubtaskById(int id) {
-        historyManager.add(subtasks.get(id));
-        return subtasks.get(id);
-    }
-
-    @Override
-    public List<Task> getAllTasks() {
-        if (tasks.size() == 0) {
-            System.out.println("Task list is empty");
-            return Collections.emptyList();
-        }
-        return new ArrayList<>(tasks.values());
-    }
-
-    @Override
-    public List<Epic> getAllEpics() {
-        if (epics.size() == 0) {
-            System.out.println("Epic list is empty");
-            return Collections.emptyList();
-        }
-        return new ArrayList<>(epics.values());
-    }
-
-    @Override
-    public List<Subtask> getAllSubtasks() {
-        if (subtasks.size() == 0) {
-            System.out.println("Subtasks list is empty");
-            return Collections.emptyList();
-        }
-        return new ArrayList<>(subtasks.values());
-    }
-
-    @Override
-    public List<Subtask> getAllSubtasksByEpicId(int id) {
-        if (epics.containsKey(id)) {
-            List<Subtask> subtasksNew = new ArrayList<>();
-            Epic epic = epics.get(id);
-            for (int i = 0; i < epic.getSubtaskIds().size(); i++) {
-                subtasksNew.add(subtasks.get(epic.getSubtaskIds().get(i)));
-            }
-            return subtasksNew;
-        } else {
-            return Collections.emptyList();
-        }
-    }
-
-    @Override
-    public void updateTask(Task task) {
-        if (tasks.containsKey(task.getId())) {
-            tasks.put(task.getId(), task);
-        } else {
-            System.out.println("Task not found");
-        }
-    }
-
-    @Override
-    public void updateEpic(Epic epic) {
-        if (epics.containsKey(epic.getId())) {
-            epics.put(epic.getId(), epic);
-            updateStatusEpic(epic);
-        } else {
-            System.out.println("Epic not found");
-        }
-    }
-
-    @Override
-    public void updateStatusEpic(Epic epic) {
-        if (epics.containsKey(epic.getId())) {
-            if (epic.getSubtaskIds().size() == 0) {
-                epic.setStatus(Status.NEW);
+            if (epics.containsKey(epicId)) {
+                Integer newId = nextId();
+                subTasks.put(newId, subTask);
+                epics.get(epicId).addSubTaskId(newId);
+                updateIssueStatus(epicId, IssueType.EPIC);
+                System.out.println("Создан SubTask " + newId);
+                return newId;
             } else {
-                List<Subtask> subtasksNew = new ArrayList<>();
-                int countDone = 0;
-                int countNew = 0;
+                System.out.println("Ошибка createIssue: регистрация subtask " + "не возможна. " + "Заданный Epic " + epicId + " не найден.");
+                return -1;
+            }
+        } else {
+            System.out.println("Ошибка: неизвестный тип задачи.");
+        }
+        return -1;
+    }
 
-                for (int i = 0; i < epic.getSubtaskIds().size(); i++) {
-                    subtasksNew.add(subtasks.get(epic.getSubtaskIds().get(i)));
+    public void removeIssue(Integer issueId, IssueType issueType) {
+        if (issueType == IssueType.TASK) {
+            if (tasks.containsKey(issueId)) tasks.remove(issueId);
+            else System.out.println("Ошибка removeIssue: Task not found " + issueId);
+        } else if (issueType == IssueType.EPIC) {
+            if (epics.containsKey(issueId)) {
+                for (Integer subtaskId : epics.get(issueId).getSubTaskIds())
+                    subTasks.remove(subtaskId);
+                epics.remove(issueId);
+            } else System.out.println("Ошибка removeIssue: Epic not found " + issueId);
+        } else if (issueType == IssueType.SUBTASK) {
+            if (subTasks.containsKey(issueId)) {
+                Epic epic = epics.get(subTasks.get(issueId).getEpicId());
+                if (epic != null) {
+                    epic.removeSubTaskId(issueId);
+                    updateIssueStatus(issueId, IssueType.EPIC);
+                } else System.out.println("Ошибка removeIssue: Subtask not found " + issueId);
+            }
+            subTasks.remove(issueId);
+        }
+    }
+
+    public void deleteAllIssuesByType(IssueType type) {
+        if (type == null) {
+            System.out.println("Ошибка deleteAllIssueByType: задача не задана.");
+        } else if (type == IssueType.TASK) {
+            for (Integer taskId : tasks.keySet())
+                removeIssue(taskId, IssueType.TASK);
+        } else if (type == IssueType.SUBTASK) {
+            for (Integer subtaskId : subTasks.keySet())
+                removeIssue(subtaskId, IssueType.SUBTASK);
+        } else if (type == IssueType.EPIC) {
+            for (Integer epicId : epics.keySet())
+                removeIssue(epicId, IssueType.EPIC);
+        } else {
+            System.out.println("Ошибка deleteAllIssueByType: тип задачи не задан.");
+        }
+    }
+
+    public Issue getIssueById(Integer id) {
+        if (tasks.containsKey(id)) {
+            historyManager.add(id, tasks.get(id));
+            return tasks.get(id);
+        } else if (subTasks.containsKey(id)) {
+            historyManager.add(id, subTasks.get(id));
+            return subTasks.get(id);
+        } else if (epics.containsKey(id)) {
+            historyManager.add(id, epics.get(id));
+            return epics.get(id);
+        } else {
+            System.out.println("Ошибка getIssue: задача не найдена");
+            return null;
+        }
+    }
+
+    public Set<Issue> getAllByType(IssueType type) {
+        if (type == null) {
+            System.out.println("Ошибка getAllByType: тип задачи не задан.");
+            return Collections.emptySet();
+        } else if (type == IssueType.TASK) {
+            if (tasks.size() == 0) {
+                System.out.println("getAllTasks: Task list is empty");
+                return Collections.emptySet();
+            }
+            return new HashSet<>(tasks.values());
+        } else if (type == IssueType.SUBTASK) {
+            if (subTasks.size() == 0) {
+                System.out.println("getAllTasks: Subtasks list is empty");
+                return Collections.emptySet();
+            }
+            return new HashSet<>(subTasks.values());
+        } else if (type == IssueType.EPIC) {
+            if (subTasks.size() == 0) {
+                System.out.println("Subtasks list is empty");
+                return Collections.emptySet();
+            }
+            return new HashSet<>(subTasks.values());
+        }
+        return Collections.emptySet();
+    }
+
+    public Set<SubTask> getAllSubTasksByEpicId(Integer id) {
+        if (epics.containsKey(id)) {
+            Set<SubTask> subTasksNew = new HashSet<>();
+            for (Integer subtaskId : epics.get(id).getSubTaskIds())
+                subTasksNew.add(subTasks.get(subtaskId));
+            return subTasksNew;
+        } else {
+            return Collections.emptySet();
+        }
+    }
+
+    public void setIssueStatus(Integer issueId, IssueType issueType, Status status) {
+        if (issueType == IssueType.EPIC) {
+            epics.get(issueId).setStatus(status);
+            if (status == Status.DONE) {
+                for (Integer subtaskId : epics.get(issueId).getSubTaskIds())
+                    subTasks.get(subtaskId).setStatus(Status.DONE);
+            } else if (status == Status.NEW) {
+                for (Integer subtaskId : epics.get(issueId).getSubTaskIds())
+                    subTasks.get(subtaskId).setStatus(Status.NEW);
+            }
+        } else if (issueType == IssueType.SUBTASK) {
+            subTasks.get(issueId).setStatus(status);
+            Integer epicId = subTasks.get(issueId).getEpicId();
+            updateIssueStatus(epicId, IssueType.EPIC);
+        } else if (issueType == IssueType.TASK) {
+            tasks.get(issueId).setStatus(status);
+        } else {
+            System.out.println("Ошибка setIssueStatus: Epic not found " + issueId);
+        }
+    }
+
+    public void updateIssueStatus(Integer issueId, IssueType issueType) {
+        if (issueType == IssueType.EPIC) {
+            if (epics.containsKey(issueId)) {
+                Epic epic = epics.get(issueId);
+                if (epic == null) {
+                    System.out.println("Ошибка обновления статуса: Epic not found " + issueId);
+                    return;
                 }
-
-                for (Subtask subtask : subtasksNew) {
-                    if (subtask.getStatus() == Status.DONE) {
-                        countDone++;
-                    }
-                    if (subtask.getStatus() == Status.NEW) {
-                        countNew++;
-                    }
-                    if (subtask.getStatus() == Status.IN_PROGRESS) {
-                        epic.setStatus(Status.IN_PROGRESS);
-                        return;
-                    }
-                }
-
-                if (countDone == epic.getSubtaskIds().size()) {
-                    epic.setStatus(Status.DONE);
-                } else if (countNew == epic.getSubtaskIds().size()) {
+                if (epic.getSubTaskIds().isEmpty()) {
                     epic.setStatus(Status.NEW);
                 } else {
-                    epic.setStatus(Status.IN_PROGRESS);
+                    int doneCount = 0;
+                    int newCount = 0;
+
+                    for (Integer subTaskId : epic.getSubTaskIds()) {
+                        if (subTasks.get(subTaskId).getStatus() == Status.DONE)
+                            doneCount++;
+                        if (subTasks.get(subTaskId).getStatus() == Status.NEW)
+                            newCount++;
+                        if (subTasks.get(subTaskId).getStatus() == Status.IN_PROGRESS) {
+                            epic.setStatus(Status.IN_PROGRESS);
+                            return;
+                        }
+                    }
+
+                    if (doneCount == epic.getSubTaskIds().size()) {
+                        epic.setStatus(Status.DONE);
+                    } else if (newCount == epic.getSubTaskIds().size()) {
+                        epic.setStatus(Status.NEW);
+                    } else {
+                        epic.setStatus(Status.IN_PROGRESS);
+                    }
                 }
+            } else {
+                System.out.println("Ошибка обновления статуса: Epic not found " + issueId);
+            }
+        } else if (issueType == IssueType.SUBTASK) {
+            SubTask subTask = subTasks.get(issueId);
+            if (subTask == null) {
+                System.out.println("Ошибка обновления статуса: Subtask not found " + issueId);
+                return;
+            }
+            Integer epicId = subTask.getEpicId();
+            updateIssueStatus(epicId, IssueType.EPIC);
+        } else {
+            System.out.println("Ошибка обновления статуса: Type not found");
+        }
+    }
+
+    public void printIssue(Integer issueId, IssueType issueType) {
+        if (issueType == IssueType.TASK) {
+            System.out.println("Task{" + "id=" + issueId + ", name=" + tasks.get(issueId).getName() + ", description=" + tasks.get(issueId).getDescription() + ", status=" + tasks.get(issueId).getStatus() + '}');
+        } else if (issueType == IssueType.SUBTASK) {
+            System.out.println("Subtask{" + "id=" + issueId + ", epicId=" + subTasks.get(issueId).getEpicId() + ", name=" + subTasks.get(issueId).getName() + ", description=" + subTasks.get(issueId).getDescription() + ", status=" + subTasks.get(issueId).getStatus() + '}');
+        } else if (issueType == IssueType.EPIC) {
+            System.out.println("Epic{" + "id=" + issueId + ", subtasksIds=" + epics.get(issueId).getSubTaskIds() + ", name=" + epics.get(issueId).getName() + ", description=" + epics.get(issueId).getDescription() + ", status=" + epics.get(issueId).getStatus() + '}');
+        } else {
+            System.out.println("Ошибка printIssue: тип задачи не задан.");
+        }
+    }
+
+    public void printAllIssuesByType(IssueType issuetype) {
+        if (issuetype == null) {
+            System.out.println("Ошибка printIssueByType: тип задачи не задан.");
+        } else if (issuetype == IssueType.TASK) {
+            for (Integer issueId : tasks.keySet())
+                printIssue(issueId, IssueType.TASK);
+        } else if (issuetype == IssueType.SUBTASK) {
+            for (Integer issueId : subTasks.keySet())
+                printIssue(issueId, IssueType.SUBTASK);
+        } else if (issuetype == IssueType.EPIC) {
+            for (Integer issueId : epics.keySet()) {
+                printIssue(issueId, IssueType.EPIC);
             }
         } else {
-            System.out.println("Epic not found");
+            System.out.println("Ошибка printIssueByType: тип задачи не задан.");
         }
     }
 
-    @Override
-    public void updateSubtask(Subtask subtask) {
-        if (subtasks.containsKey(subtask.getId())) {
-            subtasks.put(subtask.getId(), subtask);
-            Epic epic = epics.get(subtask.getEpicId());
-            updateStatusEpic(epic);
-        } else {
-            System.out.println("Subtask not found");
-        }
-    }
-
-    @Override
-    public void printTasks() {
-        if (tasks.size() == 0) {
-            System.out.println("Task list is empty");
-            return;
-        }
-        for (Task task : tasks.values()) {
-            System.out.println("Task{" +
-                    "description='" + task.getDescription() + '\'' +
-                    ", id=" + task.getId() +
-                    ", name='" + task.getName() + '\'' +
-                    ", status=" + task.getStatus() +
-                    '}');
-        }
-    }
-
-    @Override
-    public void printEpics() {
-        if (epics.size() == 0) {
-            System.out.println("Epic list is empty");
-            return;
-        }
-        for (Epic epic : epics.values()) {
-            System.out.println("Epic{" +
-                    "subtasksIds=" + epic.getSubtaskIds() +
-                    ", description='" + epic.getDescription() + '\'' +
-                    ", id=" + epic.getId() +
-                    ", name='" + epic.getName() + '\'' +
-                    ", status=" + epic.getStatus() +
-                    '}');
-        }
-    }
-
-    @Override
-    public void printSubtasks() {
-        if (subtasks.size() == 0) {
-            System.out.println("Subtask list is empty");
-            return;
-        }
-        for (Subtask subtask : subtasks.values()) {
-            System.out.println("Subtask{" +
-                    "epicId=" + subtask.getEpicId() +
-                    ", description='" + subtask.getDescription() + '\'' +
-                    ", id=" + subtask.getId() +
-                    ", name='" + subtask.getName() + '\'' +
-                    ", status=" + subtask.getStatus() +
-                    '}');
-        }
-    }
-
-    @Override
-    public List<Task> getHistory() {
+    public Set<Issue> getHistory() {
         return historyManager.getHistory();
     }
 }
+

@@ -1,4 +1,4 @@
-package ru.yandex.tasktracker.issues;
+package ru.yandex.tasktracker.issue;
 
 public enum Status {
     NEW("To Do"),

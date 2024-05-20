@@ -1,14 +1,19 @@
-package ru.yandex.tasktracker.issues;
+package ru.yandex.tasktracker.issue;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.Objects;
+
 @Data
-@AllArgsConstructor
 public abstract class Issue {
-    private Integer id;
-    private String name;
-    private Status status;
-    private String description;
-    private Type type;
+    protected String name;
+    protected String description;
+    protected Status status;
+
+    @Override
+    public String toString() {
+        return getName() + ","
+                + getStatus() + ","
+                + getDescription() + ",\n";
+    }
 }

@@ -51,6 +51,8 @@ public class Main {
         taskManager.setTaskStatus(1, Status.IN_PROGRESS);
         taskManager.printTask(1);
 
+        taskManager.printHistory();
+
         System.out.println("Эпики ................");
         taskManager.printAllEpics();
         System.out.println("Get epic ................");
@@ -59,5 +61,11 @@ public class Main {
         taskManager.setEpicStatus(3, Status.DONE);
         taskManager.printEpic(3);
         taskManager.printAllSubTasks();
+
+        taskManager.printHistory();
+
+        taskManager.printEpic(3);
+        taskManager.setSubTaskStatus(5, Status.IN_PROGRESS);
+        taskManager.printEpic(3);
     }
 }

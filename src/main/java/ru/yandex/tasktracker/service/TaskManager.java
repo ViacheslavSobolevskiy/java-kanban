@@ -220,8 +220,11 @@ public class TaskManager implements ITaskManager {
                 printSubTask(task.getId());
             } else if (task instanceof Epic) {
                 printEpic(task.getId());
-            }
+            } else if (task instanceof Task) {
                 printTask(task.getId());
+            } else {
+                System.out.println("Ошибка printHistory: Task not found " + task.getId());
+            }
         }
     }
 

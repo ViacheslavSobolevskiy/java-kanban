@@ -1,37 +1,27 @@
 package ru.yandex.tasktracker.service;
 
-import ru.yandex.tasktracker.issue.Issue;
+import org.jetbrains.annotations.NotNull;
+import ru.yandex.tasktracker.issue.Task;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.LinkedList;
+import java.util.List;
 
 public class HistoryManager implements IHistoryManager {
-    private static final int MAX_HISTORY_TASKS = 20;
-    private final Map<Integer, Issue> historyTasks = new HashMap<>();
+    private static final int MAX_HISTORY_TASKS = 5;
+    private final List<Task> historyTasks = new LinkedList<>();
 
-    public void add(Integer id, Issue issue) {
-        if (issue != null) {
-            if (historyTasks.size() >= MAX_HISTORY_TASKS) {
-                historyTasks.remove(0);
-                historyTasks.put(id, issue);
-            } else {
-                historyTasks.put(id, issue);
-            }
+    @Override
+    public void add(@NotNull Task task) {
+        if (historyTasks.size() >= MAX_HISTORY_TASKS) {
+            historyTasks.remove(0);
+            historyTasks.add(task);
         } else {
-            System.out.println("Ошибка HistoryManager.add");
+            historyTasks.add(task);
         }
     }
 
-    public Set<Issue> getHistory() {
-        return historyTasks.values().stream().collect(Collectors.toSet());
-    }
-
-    public void printHistory() {
-        System.out.println("История задач:");
-        for (Issue issue : historyTasks.values()) {
-            System.out.println(issue);
-        }
+    @Override
+    public List<Task> getHistory() {
+        return historyTasks;
     }
 }

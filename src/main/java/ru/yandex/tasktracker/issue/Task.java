@@ -5,7 +5,11 @@ import lombok.Data;
 import java.util.Objects;
 
 @Data
-public class Task extends Issue {
+public class Task {
+    protected Integer id;
+    protected String name;
+    protected String description;
+    protected Status status;
 
     public Task(String name, String description, Status status) {
         this.name = name;
@@ -22,5 +26,13 @@ public class Task extends Issue {
         return Objects.equals(description, task.description)
                 && Objects.equals(name, task.name)
                 && status == task.status;
+    }
+
+    @Override
+    public String toString() {
+        return  getId() + ","
+                + getName() + ","
+                + getStatus() + ","
+                + getDescription() + ",\n";
     }
 }

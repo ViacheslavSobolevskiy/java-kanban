@@ -1,20 +1,18 @@
 package ru.yandex.tasktracker.issue;
 
-import lombok.Data;
-
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Data
-public class Epic extends Issue {
-    private final Set<Integer> subTaskIds;
+public class Epic extends Task {
+    private Set<Integer> subTaskIds = new HashSet<>();
 
     public Epic(String name, String description, Status status) {
-        this.name = name;
-        this.description = description;
-        this.status = status;
-        subTaskIds = new HashSet<>();
+        super(name, description, status);
+    }
+
+    public Set<Integer> getSubTaskIds() {
+        return subTaskIds;
     }
 
     boolean hasSubTaskId(Integer subtaskId) {

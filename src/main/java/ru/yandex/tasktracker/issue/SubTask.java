@@ -1,17 +1,20 @@
 package ru.yandex.tasktracker.issue;
 
-import lombok.Data;
-
 import java.util.Objects;
 
-@Data
-public class SubTask extends Issue {
+public class SubTask extends Task {
     private Integer epicId;
 
     public SubTask(String name, String description, Status status, Integer epicId) {
-        this.name = name;
-        this.description = description;
-        this.status = status;
+        super(name, description, status);
+        this.epicId = epicId;
+    }
+
+    public Integer getEpicId() {
+        return epicId;
+    }
+
+    void setEpicId(Integer epicId) {
         this.epicId = epicId;
     }
 

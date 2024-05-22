@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class HistoryManager implements IHistoryManager {
-    private static final int MAX_HISTORY_TASKS = 5;
+    private static final int MAX_HISTORY_TASKS = 20;
     private final List<Task> historyTasks = new LinkedList<>();
 
     @Override

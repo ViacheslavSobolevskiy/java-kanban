@@ -6,7 +6,7 @@ import java.util.Objects;
 
 @Data
 public class Task {
-    protected Integer id;
+    protected int id;
     protected String name;
     protected String description;
     protected Status status;
@@ -34,5 +34,11 @@ public class Task {
                 + getName() + ","
                 + getStatus() + ","
                 + getDescription() + ",\n";
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getId(), getName(), getStatus(),
+                getDescription());
     }
 }

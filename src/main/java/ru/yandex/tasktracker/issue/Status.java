@@ -11,6 +11,7 @@ public enum Status {
         this.description = translation;
     }
 
+    @Override
     public String toString() {
         return description;
     }

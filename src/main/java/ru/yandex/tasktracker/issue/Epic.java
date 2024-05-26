@@ -5,27 +5,35 @@ import java.util.Objects;
 import java.util.Set;
 
 public class Epic extends Task {
-    private Set<Integer> subTaskIds = new HashSet<>();
+    private Set<Integer> subtaskIds = new HashSet<>();
 
-    public Epic(String name, String description, Status status) {
-        super(name, description, status);
+    public Epic() {
+        super("Noname", "No description", Status.NEW);
     }
 
-    public Set<Integer> getSubTaskIds() {
-        return subTaskIds;
+    public Epic(String name) {
+        super(name, "Not set", Status.NEW);
     }
 
-    boolean hasSubTaskId(Integer subtaskId) {
-        return subTaskIds != null && subTaskIds.contains(subtaskId);
+    public Epic(String name, String description) {
+        super(name, description, Status.NEW);
     }
 
-    public void addSubTaskId(Integer subTaskId) {
-        subTaskIds.add(subTaskId);
+    public Set<Integer> getSubtaskIds() {
+        return subtaskIds;
     }
 
-    public void removeSubTaskId(Integer subTaskId) {
-        if (hasSubTaskId(subTaskId)) {
-            subTaskIds.remove(subTaskId);
+    boolean hasSubtaskId(Integer subtaskId) {
+        return subtaskIds != null && subtaskIds.contains(subtaskId);
+    }
+
+    public void addSubtaskId(Integer subTaskId) {
+        subtaskIds.add(subTaskId);
+    }
+
+    public void removeSubtaskId(Integer subTaskId) {
+        if (hasSubtaskId(subTaskId)) {
+            subtaskIds.remove(subTaskId);
         }
     }
 
@@ -35,9 +43,14 @@ public class Epic extends Task {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Epic epic = (Epic) o;
-        return Objects.equals(subTaskIds, epic.subTaskIds)
+        return Objects.equals(subtaskIds, epic.subtaskIds)
                 && Objects.equals(name, epic.name)
                 && Objects.equals(description, epic.description)
                 && Objects.equals(status, epic.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), subtaskIds, name, description, status);
     }
 }

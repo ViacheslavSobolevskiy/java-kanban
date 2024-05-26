@@ -4,9 +4,10 @@ import ru.yandex.tasktracker.issue.Task;
 
 import java.util.List;
 
-public interface IHistoryManager {
+public interface HistoryManager {
 
     void add(Task issue);
 
     List<Task> getHistory();
+
 }

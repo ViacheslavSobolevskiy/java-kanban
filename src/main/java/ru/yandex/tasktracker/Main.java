@@ -1,7 +1,10 @@
 package ru.yandex.tasktracker;
 
-import ru.yandex.tasktracker.issue.*;
-import ru.yandex.tasktracker.service.*;
+import ru.yandex.tasktracker.issue.Epic;
+import ru.yandex.tasktracker.issue.Status;
+import ru.yandex.tasktracker.issue.Subtask;
+import ru.yandex.tasktracker.issue.Task;
+import ru.yandex.tasktracker.service.InMemoryTaskManager;
 import ru.yandex.tasktracker.service.TaskManager;
 import ru.yandex.tasktracker.util.Managers;
 
@@ -9,13 +12,14 @@ public class Main {
 
     public static void main(String[] args) {
         TaskManager taskManager = new InMemoryTaskManager(Managers.getDefaultHistory());
-        InMemoryTaskManager tm = (InMemoryTaskManager) taskManager;
 
-        System.out.println("Создание Issues ..........................");
+        System.out.println("Пример работы с задачами ..........................");
         taskManager.createTask(new Task("Task-1", "Task-1", Status.NEW));
         taskManager.createTask(new Task("Task-2", "Task-2", Status.NEW));
+
         taskManager.createEpic(new Epic("Epic-3", "Epic-3", Status.NEW));
         taskManager.createEpic(new Epic("Epic-4", "Epic-4", Status.NEW));
+
         taskManager.createSubtask(new Subtask("Subtask-5", "Subtask-5", Status.NEW, 3));
         taskManager.createSubtask(new Subtask("Subtask-6", "Subtask-6", Status.NEW, 3));
         taskManager.createSubtask(new Subtask("Subtask-7", "Subtask-7", Status.NEW, 3));
@@ -26,7 +30,11 @@ public class Main {
         taskManager.createSubtask(new Subtask("Subtask-11", "Subtask-11", Status.NEW, 4));
         taskManager.createSubtask(new Subtask("Subtask-12", "Subtask-12", Status.NEW, 4));
 
-        System.out.println("Получение Issues по id ..........................");
+        taskManager.updateSubtaskStatus(5, Status.IN_PROGRESS);
+        taskManager.updateSubtaskStatus(6, Status.DONE);
+        taskManager.updateSubtaskStatus(7, Status.IN_PROGRESS);
+        taskManager.updateSubtaskStatus(8, Status.IN_PROGRESS);
+
         taskManager.getTask(1);
         taskManager.getTask(2);
         taskManager.getEpic(3);
@@ -41,33 +49,12 @@ public class Main {
         taskManager.getSubtask(7);
         taskManager.getTask(2);
 
-        System.out.println("Текущие Tasks ..........................");
-        tm.printAllTasks();
-        tm.printAllSubtasks();
-        tm.printAllEpics();
-
-        System.out.println("Добавляем задачи ..........................");
-        System.out.println("--- Create task ---");
         taskManager.createTask(new Task("Описание-9", "Task-9", Status.NEW));
         taskManager.createTask(new Task("Описание-10", "Task-10", Status.NEW));
-        tm.printAllTasks();
 
-        System.out.println("Тест статуса Tasks ..........................");
-        tm.updateTaskStatus(1, Status.IN_PROGRESS);
-        tm.printTask(1);
+        taskManager.updateTaskStatus(1, Status.IN_PROGRESS);
 
-        tm.printHistory();
-
-        System.out.println("Эпики ................");
-        tm.printAllEpics();
-        System.out.println("Get epic ................");
-        tm.printEpic(3);
-        System.out.println("Update epic ................");
-        tm.updateEpicStatus(3, Status.DONE);
-        tm.printEpic(3);
-        tm.printAllSubtasks();
-
-        tm.printHistory();
+        System.out.println(taskManager.getHistory());
 
     }
 }

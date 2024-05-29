@@ -46,9 +46,10 @@ public class InMemoryTaskManager implements TaskManager {
             subtasks.put(newId, subtask);
             epics.get(epicId).addSubtaskId(newId);
             updateEpicStatus(epicId);
-        } else {
-            System.out.println("Ошибка createSubtask: Epic not found " + epicId);
+            return newId;
         }
+
+        System.out.println("Ошибка createSubtask: Epic not found " + epicId);
         return -1;
     }
 
@@ -226,82 +227,12 @@ public class InMemoryTaskManager implements TaskManager {
         updateEpicStatus(epicId);
     }
 
-    public void printTask(int taskId) {
-        if (tasks.containsKey(taskId))
-            System.out.println(tasks.get(taskId));
-        else
-            System.out.println("Ошибка printTask: Task not found " + taskId);
-    }
-
-    public void printSubtask(int subtaskId) {
-        if (subtasks.containsKey(subtaskId))
-            System.out.println(subtasks.get(subtaskId));
-        else
-            System.out.println("Ошибка printTask: Subtask not found " + subtaskId);
-    }
-
-    public void printEpic(int epicId) {
-        if (epics.containsKey(epicId)) {
-            System.out.println(epics.get(epicId));
-
-            for (int subtaskId : epics.get(epicId).getSubtaskIds()) {
-                System.out.println("--> " + subtasks.get(subtaskId));
-            }
-        } else
-            System.out.println("Ошибка printEpic: Epic not found " + epicId);
-    }
-
-    public void printAllTasks() {
-        System.out.println("Задачи:");
-        for (Task task : tasks.values()) {
-            System.out.println(task);
-        }
-
-        System.out.println("Эпики:");
-        for (Epic epic : epics.values()) {
-            System.out.println(epic);
-
-            for (Integer subtaskId : epics.get(epic.getId()).getSubtaskIds()) {
-                System.out.println("--> " + subtasks.get(subtaskId));
-            }
-        }
-
-        System.out.println("Подзадачи:");
-        for (Subtask subtask : subtasks.values()) {
-            System.out.println(subtask);
-        }
-    }
-
-    public void printAllSubtasks() {
-        for (int subtaskId : subtasks.keySet())
-            printSubtask(subtaskId);
-    }
-
-    public void printAllEpics() {
-        for (int epicId : epics.keySet())
-            printEpic(epicId);
-    }
-
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();
     }
 
-    public void printHistory() {
-        System.out.println("История задач:");
-        for (Task task : getHistory()) {
-            int id = task.getId();
-            if (subtasks.containsKey(id))
-                printSubtask(id);
-            else if (epics.containsKey(id))
-                printEpic(id);
-            else if (tasks.containsKey(id))
-                printTask(id);
-            else
-                System.out.println("Ошибка printHistory: Task not found " + id);
-        }
-    }
-
+    // Для тестовых нужд
     public void reset() {
         tasks.clear();
         subtasks.clear();

@@ -14,19 +14,19 @@ public interface TaskManager {
 
     int createTask(@NotNull Task task);
 
-    int createSubtask(@NotNull Subtask Subtask);
+    int createSubtask(@NotNull Subtask subtask);
 
     int createEpic(@NotNull Epic epic);
 
     void removeTask(int taskId);
 
-    void removeSubtask(int SubtaskId);
+    void removeSubtask(int subtaskId);
 
     void removeEpic(int epicId);
 
     Task getTask(int taskId);
 
-    Subtask getSubtask(int SubtaskId);
+    Subtask getSubtask(int subtaskId);
 
     Epic getEpic(int epicId);
 

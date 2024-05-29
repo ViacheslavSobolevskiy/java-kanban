@@ -59,14 +59,31 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void testUpdateEpicStatus() {
+    void testUpdateEpicStatus1() {
         Epic epic = new Epic("Epic-1", "Epic-1", Status.NEW);
         int epicId = taskManager.createEpic(epic);
+
         Subtask subtask = new Subtask("Subtask-2", "Subtask-2", Status.DONE, epicId);
         subtask.setEpicId(epicId);
+
         int subtaskId = taskManager.createSubtask(subtask);
         taskManager.updateSubtaskStatus(subtaskId, Status.DONE);
+
         assertEquals(Status.DONE, taskManager.getEpic(epicId).getStatus());
+    }
+
+    @Test
+    void testUpdateEpicStatus2() {
+        taskManager.createEpic(new Epic("Epic-1", "Epic-1", Status.IN_PROGRESS));
+
+        taskManager.createSubtask(new Subtask("Subtask-2", "Subtask-2", Status.IN_PROGRESS, 1));
+        taskManager.createSubtask(new Subtask("Subtask-3", "Subtask-3", Status.DONE, 1));
+
+        InMemoryTaskManager tm = (InMemoryTaskManager) taskManager;
+        tm.updateEpicStatus(1, Status.NEW);
+
+        assertEquals(Status.NEW, taskManager.getSubtask(2).getStatus());
+        assertEquals(Status.NEW, taskManager.getSubtask(3).getStatus());
     }
 
     @Test

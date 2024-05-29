@@ -54,6 +54,12 @@ public class Main {
 
         taskManager.updateTaskStatus(1, Status.IN_PROGRESS);
 
+        Subtask updatedSubtask = new Subtask("Subtask-2", Status.IN_PROGRESS, 1);
+        taskManager.updateSubtask(6, updatedSubtask);
+
+        Epic updatedEpic = new Epic("Epic-3", "Epic-3", Status.DONE);
+        taskManager.updateEpic(3, updatedEpic);
+
         System.out.println(taskManager.getHistory());
 
     }

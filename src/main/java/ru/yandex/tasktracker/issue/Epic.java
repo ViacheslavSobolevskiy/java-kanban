@@ -5,13 +5,9 @@ import java.util.Objects;
 import java.util.Set;
 
 public class Epic extends Task {
-    private Set<Integer> subtaskIds = new HashSet<>();
+    private final Set<Integer> subtaskIds = new HashSet<>();
 
-    public Epic() {
-        super("Noname", "No description", Status.NEW);
-    }
-
-    public Epic(String name) {
+    public Epic(String name, String s, Status aNew) {
         super(name, "Not set", Status.NEW);
     }
 
@@ -20,37 +16,32 @@ public class Epic extends Task {
     }
 
     public Set<Integer> getSubtaskIds() {
-        return subtaskIds;
+        return Set.copyOf(subtaskIds);
     }
 
-    boolean hasSubtaskId(Integer subtaskId) {
-        return subtaskIds != null && subtaskIds.contains(subtaskId);
+    public boolean containsSubtaskId(Integer subtaskId) {
+        return subtaskIds.contains(subtaskId);
     }
 
-    public void addSubtaskId(Integer subTaskId) {
-        subtaskIds.add(subTaskId);
+    public void addSubtaskId(Integer subtaskId) {
+        subtaskIds.add(subtaskId);
     }
 
-    public void removeSubtaskId(Integer subTaskId) {
-        if (hasSubtaskId(subTaskId)) {
-            subtaskIds.remove(subTaskId);
-        }
+    public void removeSubtaskId(Integer subtaskId) {
+        subtaskIds.remove(subtaskId);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Epic epic = (Epic) o;
-        return Objects.equals(subtaskIds, epic.subtaskIds)
-                && Objects.equals(name, epic.name)
-                && Objects.equals(description, epic.description)
-                && Objects.equals(status, epic.status);
+        Epic other = (Epic) o;
+        return super.equals(o) &&
+                Objects.equals(subtaskIds, other.subtaskIds);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), subtaskIds, name, description, status);
+        return Objects.hash(super.hashCode(), subtaskIds);
     }
 }

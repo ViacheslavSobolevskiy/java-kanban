@@ -2,6 +2,7 @@ package ru.yandex.tasktracker.issue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.tasktracker.service.InMemoryTaskManager;
 import ru.yandex.tasktracker.service.TaskManager;
 import ru.yandex.tasktracker.util.Managers;
 
@@ -11,12 +12,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EpicTest {
 
-    public static Managers managers = new Managers();
-    public static TaskManager taskManager = managers.getDefault();
+    public static TaskManager taskManager = new InMemoryTaskManager(Managers.getDefaultHistory());
 
     @BeforeEach
     void setUp() {
-        taskManager.reset();
+        ((InMemoryTaskManager) taskManager).reset();
     }
 
     @Test
@@ -41,8 +41,8 @@ class EpicTest {
         taskManager.createSubtask(new Subtask("Subtask-3", "Subtask-3",
                 Status.NEW, 1));
 
-        assertTrue(taskManager.getEpic(1).hasSubtaskId(2)
-                        && taskManager.getEpic(1).hasSubtaskId(3),
+        assertTrue(taskManager.getEpic(1).containsSubtaskId(2)
+                        && taskManager.getEpic(1).containsSubtaskId(3),
                 "Subtask-2 should exist");
     }
 
@@ -55,8 +55,8 @@ class EpicTest {
         taskManager.createSubtask(new Subtask("Subtask-3", "Subtask-3",
                 Status.NEW, 1));
 
-        assertTrue(taskManager.getEpic(1).hasSubtaskId(2) &
-                        taskManager.getEpic(1).hasSubtaskId(3),
+        assertTrue(taskManager.getEpic(1).containsSubtaskId(2)
+                        && taskManager.getEpic(1).containsSubtaskId(3),
                 "Subtask-2 should exist");
     }
 
@@ -73,39 +73,12 @@ class EpicTest {
 
         taskManager.removeSubtask(3);
 
-        assertTrue(taskManager.getEpic(1).hasSubtaskId(2),
+        assertTrue(taskManager.getEpic(1).containsSubtaskId(2),
                 "Subtask-2 should exist");
-        assertFalse(taskManager.getEpic(1).hasSubtaskId(3),
+        assertFalse(taskManager.getEpic(1).containsSubtaskId(3),
                 "Subtask-2 should not exist");
-        assertTrue(taskManager.getEpic(1).hasSubtaskId(4),
+        assertTrue(taskManager.getEpic(1).containsSubtaskId(4),
                 "Subtask-2 should exist");
-    }
-
-    @Test
-    void emptyEpicStatusShouldBeNew() {
-        taskManager.createEpic(new Epic("Epic-1"));
-        taskManager.createEpic(new Epic("Epic-2", "Epic-2"));
-
-        assertEquals(Status.NEW, taskManager.getEpic(1).getStatus(),
-                "Epic status should be NEW");
-        assertEquals(Status.NEW, taskManager.getEpic(2).getStatus(),
-                "Epic status should be NEW");
-
-        taskManager.setEpicStatus(1, Status.IN_PROGRESS);
-        taskManager.setEpicStatus(2, Status.IN_PROGRESS);
-
-        assertEquals(Status.NEW, taskManager.getEpic(1).getStatus(),
-                "Epic status should be NEW");
-        assertEquals(Status.NEW, taskManager.getEpic(2).getStatus(),
-                "Epic status should be NEW");
-
-        taskManager.setEpicStatus(1, Status.DONE);
-        taskManager.setEpicStatus(2, Status.DONE);
-
-        assertEquals(Status.NEW, taskManager.getEpic(1).getStatus(),
-                "Epic status should be NEW");
-        assertEquals(Status.NEW, taskManager.getEpic(2).getStatus(),
-                "Epic status should be NEW");
     }
 
     @Test
@@ -182,7 +155,7 @@ class EpicTest {
         taskManager.createSubtask(new Subtask("Subtask-1", "Subtask-1",
                 Status.NEW, 1));
 
-        taskManager.setSubtaskStatus(2, Status.IN_PROGRESS);
+        taskManager.updateSubtaskStatus(2, Status.IN_PROGRESS);
 
         assertEquals(Status.IN_PROGRESS, taskManager.getEpic(1).getStatus(),
                 "Epic status should be NEW");
@@ -208,8 +181,8 @@ class EpicTest {
         taskManager.createSubtask(new Subtask("Subtask-3",
                 Status.NEW, 1));
 
-        taskManager.setSubtaskStatus(2, Status.DONE);
-        taskManager.setSubtaskStatus(3, Status.DONE);
+        taskManager.updateSubtaskStatus(2, Status.DONE);
+        taskManager.updateSubtaskStatus(3, Status.DONE);
 
         assertEquals(Status.DONE, taskManager.getEpic(1).getStatus(),
                 "Epic status should be NEW");

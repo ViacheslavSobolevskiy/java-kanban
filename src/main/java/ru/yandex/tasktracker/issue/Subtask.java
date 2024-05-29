@@ -29,7 +29,7 @@ public class Subtask extends Task {
         return epicId;
     }
 
-    void setEpicId(Integer epicId) {
+    public void setEpicId(Integer epicId) {
         this.epicId = epicId;
     }
 

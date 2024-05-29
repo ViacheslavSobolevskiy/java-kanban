@@ -1,68 +1,73 @@
 package ru.yandex.tasktracker;
 
 import ru.yandex.tasktracker.issue.*;
-import ru.yandex.tasktracker.service.HistoryManager;
-import ru.yandex.tasktracker.service.InMemoryHistoryManager;
-import ru.yandex.tasktracker.service.InMemoryTaskManager;
+import ru.yandex.tasktracker.service.*;
 import ru.yandex.tasktracker.service.TaskManager;
+import ru.yandex.tasktracker.util.Managers;
 
 public class Main {
 
     public static void main(String[] args) {
-        HistoryManager inMemoryHistoryManager = new InMemoryHistoryManager();
-        TaskManager inMemoryTaskManager = new InMemoryTaskManager(inMemoryHistoryManager);
+        TaskManager taskManager = new InMemoryTaskManager(Managers.getDefaultHistory());
+        InMemoryTaskManager tm = (InMemoryTaskManager) taskManager;
 
         System.out.println("Создание Issues ..........................");
-        inMemoryTaskManager.createTask(new Task("Task-1", "Task-1", Status.NEW));
-        inMemoryTaskManager.createTask(new Task("Task-2", "Task-2", Status.NEW));
+        taskManager.createTask(new Task("Task-1", "Task-1", Status.NEW));
+        taskManager.createTask(new Task("Task-2", "Task-2", Status.NEW));
+        taskManager.createEpic(new Epic("Epic-3", "Epic-3", Status.NEW));
+        taskManager.createEpic(new Epic("Epic-4", "Epic-4", Status.NEW));
+        taskManager.createSubtask(new Subtask("Subtask-5", "Subtask-5", Status.NEW, 3));
+        taskManager.createSubtask(new Subtask("Subtask-6", "Subtask-6", Status.NEW, 3));
+        taskManager.createSubtask(new Subtask("Subtask-7", "Subtask-7", Status.NEW, 3));
+        taskManager.createSubtask(new Subtask("Subtask-8", "Subtask-8", Status.NEW, 3));
 
-        inMemoryTaskManager.createSubtask(new Subtask("Subtask-5", "Subtask-5", Status.NEW, 3));
-        inMemoryTaskManager.createSubtask(new Subtask("Subtask-6", "Subtask-6", Status.NEW, 3));
-        inMemoryTaskManager.createSubtask(new Subtask("Subtask-7", "Subtask-7", Status.NEW, 4));
-        inMemoryTaskManager.createSubtask(new Subtask("Subtask-8", "Subtask-8", Status.NEW, 4));
+        taskManager.createSubtask(new Subtask("Subtask-9", "Subtask-9", Status.NEW, 4));
+        taskManager.createSubtask(new Subtask("Subtask-10", "Subtask-10", Status.NEW, 4));
+        taskManager.createSubtask(new Subtask("Subtask-11", "Subtask-11", Status.NEW, 4));
+        taskManager.createSubtask(new Subtask("Subtask-12", "Subtask-12", Status.NEW, 4));
 
         System.out.println("Получение Issues по id ..........................");
-        inMemoryTaskManager.getTask(1);
-        inMemoryTaskManager.getTask(2);
-        inMemoryTaskManager.getEpic(3);
-        inMemoryTaskManager.getEpic(4);
-        inMemoryTaskManager.getSubtask(5);
-        inMemoryTaskManager.getSubtask(6);
-        inMemoryTaskManager.getEpic(4);
-        inMemoryTaskManager.getSubtask(5);
-        inMemoryTaskManager.getSubtask(6);
-        inMemoryTaskManager.getSubtask(7);
-        inMemoryTaskManager.getSubtask(8);
-        inMemoryTaskManager.getSubtask(7);
-        inMemoryTaskManager.getTask(2);
+        taskManager.getTask(1);
+        taskManager.getTask(2);
+        taskManager.getEpic(3);
+        taskManager.getEpic(4);
+        taskManager.getSubtask(5);
+        taskManager.getSubtask(6);
+        taskManager.getEpic(4);
+        taskManager.getSubtask(5);
+        taskManager.getSubtask(6);
+        taskManager.getSubtask(7);
+        taskManager.getSubtask(8);
+        taskManager.getSubtask(7);
+        taskManager.getTask(2);
 
         System.out.println("Текущие Tasks ..........................");
-        inMemoryTaskManager.printAllTasks();
-        inMemoryTaskManager.printAllSubtasks();
-        inMemoryTaskManager.printAllEpics();
+        tm.printAllTasks();
+        tm.printAllSubtasks();
+        tm.printAllEpics();
 
         System.out.println("Добавляем задачи ..........................");
         System.out.println("--- Create task ---");
-        inMemoryTaskManager.createTask(new Task("Описание-9", "Task-9", Status.NEW));
-        inMemoryTaskManager.createTask(new Task("Описание-10", "Task-10", Status.NEW));
-        inMemoryTaskManager.printAllTasks();
+        taskManager.createTask(new Task("Описание-9", "Task-9", Status.NEW));
+        taskManager.createTask(new Task("Описание-10", "Task-10", Status.NEW));
+        tm.printAllTasks();
 
         System.out.println("Тест статуса Tasks ..........................");
-        inMemoryTaskManager.setTaskStatus(1, Status.IN_PROGRESS);
-        inMemoryTaskManager.printTask(1);
+        tm.updateTaskStatus(1, Status.IN_PROGRESS);
+        tm.printTask(1);
 
-        inMemoryTaskManager.printHistory();
+        tm.printHistory();
 
         System.out.println("Эпики ................");
-        inMemoryTaskManager.printAllEpics();
+        tm.printAllEpics();
         System.out.println("Get epic ................");
-        inMemoryTaskManager.printEpic(3);
+        tm.printEpic(3);
         System.out.println("Update epic ................");
-        inMemoryTaskManager.setEpicStatus(3, Status.DONE);
-        inMemoryTaskManager.printEpic(3);
-        inMemoryTaskManager.printAllSubtasks();
+        tm.updateEpicStatus(3, Status.DONE);
+        tm.printEpic(3);
+        tm.printAllSubtasks();
 
-        inMemoryTaskManager.printHistory();
+        tm.printHistory();
 
     }
 }

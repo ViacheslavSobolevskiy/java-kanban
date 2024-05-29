@@ -1,35 +1,36 @@
 package ru.yandex.tasktracker.service;
 
-import org.jetbrains.annotations.NotNull;
 import ru.yandex.tasktracker.issue.Task;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.List;
+import java.util.Objects;
 
 public class InMemoryHistoryManager implements HistoryManager {
     private static final int MAX_HISTORY_TASKS = 10;
+    private static final ArrayDeque<Task> tasks = new ArrayDeque<>(MAX_HISTORY_TASKS);
 
-    private static final List<Task> historyTasks = new LinkedList<>();
-
-    public InMemoryHistoryManager() {
-    }
 
     public static void reset() {
-        historyTasks.clear();
+        tasks.clear();
+    }
+
+    public void remove(int id) {
+        tasks.removeIf(task -> task.getId() == id);
     }
 
     @Override
-    public void add(@NotNull Task task) {
-        if (historyTasks.size() >= MAX_HISTORY_TASKS) {
-            historyTasks.remove(0);
-            historyTasks.add(task);
-        } else {
-            historyTasks.add(task);
+    public void add(Task task) {
+        Objects.requireNonNull(task);
+        if (tasks.size() >= MAX_HISTORY_TASKS) {
+            tasks.pollFirst();
         }
+
+        tasks.addLast(task);
     }
 
     @Override
     public List<Task> getHistory() {
-        return historyTasks;
+        return List.copyOf(tasks);
     }
 }

@@ -1,18 +1,17 @@
 package ru.yandex.tasktracker.issue;
 
 public enum Type {
-    EPIC("Эпик"),
-    TASK("Задача"),
-    SUBTASK("Подзадача");
+    EPIC("Epic"),
+    TASK("Task"),
+    SUBTASK("Subtask");
 
-    private final String description;
+    private final String name;
 
-    Type(String translation) {
-        this.description = translation;
+    Type(String name) {
+        this.name = name;
     }
 
-    @Override
-    public String toString() {
-        return description;
+    public String getName() {
+        return name;
     }
 }

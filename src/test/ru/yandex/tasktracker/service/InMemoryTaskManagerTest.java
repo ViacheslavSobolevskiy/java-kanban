@@ -69,35 +69,19 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void getTasks() {
+    void getAllTasks() {
     }
 
     @Test
-    void getSubtasks() {
+    void getAllSubtasks() {
     }
 
     @Test
-    void getEpics() {
+    void getAllEpics() {
     }
 
     @Test
-    void setTaskStatus() {
-    }
-
-    @Test
-    void setSubtaskStatus() {
-    }
-
-    @Test
-    void setEpicStatus() {
-    }
-
-    @Test
-    void reset() {
-    }
-
-    @Test
-    void updateEpicStatus() {
+    void updateUpdateTaskStatus() {
     }
 
     @Test

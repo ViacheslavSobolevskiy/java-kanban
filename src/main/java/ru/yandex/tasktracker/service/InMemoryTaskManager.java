@@ -10,9 +10,9 @@ import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
     private static int uniqueId = 0;
-    private static final Map<Integer, Epic> epics = new HashMap<>();
-    private static final Map<Integer, Task> tasks = new HashMap<>();
-    private static final Map<Integer, Subtask> subtasks = new HashMap<>();
+    private final Map<Integer, Epic> epics = new HashMap<>();
+    private final Map<Integer, Task> tasks = new HashMap<>();
+    private final Map<Integer, Subtask> subtasks = new HashMap<>();
     private final HistoryManager historyManager;
 
     public InMemoryTaskManager(@NotNull HistoryManager historyManager) {
@@ -131,50 +131,88 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Set<Task> getTasks() {
+    public Set<Task> getAllTasks() {
         return new HashSet<>(tasks.values());
     }
 
     @Override
-    public Set<Subtask> getSubtasks() {
+    public Set<Subtask> getAllSubtasks() {
         return new HashSet<>(subtasks.values());
     }
 
     @Override
-    public Set<Epic> getEpics() {
+    public Set<Epic> getAllEpics() {
         return new HashSet<>(epics.values());
     }
 
     @Override
-    public void setTaskStatus(int taskId, @NotNull Status status) {
-        if (tasks.containsKey(taskId))
-            tasks.get(taskId).setStatus(status);
-        else
-            System.out.println("Ошибка setTaskStatus: Task not found " + taskId);
+    public Set<Subtask> getAllSubtasksByEpicId(int epicId) {
+        if (epics.containsKey(epicId)) {
+            Set<Subtask> subtasksNew = new HashSet<>();
+            for (int subtaskId : epics.get(epicId).getSubtaskIds())
+                subtasksNew.add(subtasks.get(subtaskId));
+            return subtasksNew;
+        } else
+            return Collections.emptySet();
     }
 
     @Override
-    public void setSubtaskStatus(Integer subtaskId, Status status) {
+    public void updateTask(int taskId, @NotNull Task task) {
+        if (tasks.containsKey(taskId))
+            tasks.put(taskId, task);
+    }
+
+    @Override
+    public void updateSubtask(int subtaskId, @NotNull Subtask subtask) {
+        if (!subtasks.containsKey(subtaskId)) {
+            System.out.println("Ошибка updateSubtask: Subtask not found " + subtaskId);
+            return;
+        }
+
+        int newEpicId = subtask.getEpicId();
+
+        if (epics.containsKey(newEpicId)) {
+            removeSubtask(subtaskId);
+            subtasks.put(subtaskId, subtask);
+            epics.get(newEpicId).addSubtaskId(subtaskId);
+            updateEpicStatus(newEpicId);
+        } else
+            System.out.println("Ошибка updateSubtask: Epic not found " + newEpicId);
+    }
+
+    @Override
+    public void updateEpic(int epicId, @NotNull Epic epic) {
+        if (epics.containsKey(epicId)) {
+            removeEpic(epicId);
+            epics.put(epicId, epic);
+        } else
+            System.out.println("Ошибка updateEpic: Epic not found " + epicId);
+    }
+
+    public void updateTaskStatus(int taskId, @NotNull Status status) {
+        if (tasks.containsKey(taskId))
+            tasks.get(taskId).setStatus(status);
+    }
+
+    public void updateSubtaskStatus(int subtaskId, @NotNull Status status) {
         if (subtasks.containsKey(subtaskId)) {
             subtasks.get(subtaskId).setStatus(status);
             int epicId = subtasks.get(subtaskId).getEpicId();
             updateEpicStatus(epicId);
-        } else
-            System.out.println("Ошибка setSubtaskStatus: Subtask not found " + subtaskId);
+        }
     }
 
-    @Override
-    public void setEpicStatus(int epicId, @NotNull Status status) {
+    public void updateEpicStatus(int epicId, @NotNull Status status) {
         if (epics.containsKey(epicId)) {
             epics.get(epicId).setStatus(status);
             switch (status) {
                 case Status.IN_PROGRESS -> {
                     for (int subtaskId : epics.get(epicId).getSubtaskIds())
-                        setSubtaskStatus(subtaskId, Status.IN_PROGRESS);
+                        updateSubtaskStatus(subtaskId, Status.IN_PROGRESS);
                 }
                 case Status.DONE -> {
                     for (int subtaskId : epics.get(epicId).getSubtaskIds())
-                        setSubtaskStatus(subtaskId, Status.DONE);
+                        updateSubtaskStatus(subtaskId, Status.DONE);
                 }
                 case Status.NEW -> {
                     for (int subtaskId : epics.get(epicId).getSubtaskIds())
@@ -188,7 +226,6 @@ public class InMemoryTaskManager implements TaskManager {
         updateEpicStatus(epicId);
     }
 
-    @Override
     public void printTask(int taskId) {
         if (tasks.containsKey(taskId))
             System.out.println(tasks.get(taskId));
@@ -196,7 +233,6 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Ошибка printTask: Task not found " + taskId);
     }
 
-    @Override
     public void printSubtask(int subtaskId) {
         if (subtasks.containsKey(subtaskId))
             System.out.println(subtasks.get(subtaskId));
@@ -204,7 +240,6 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Ошибка printTask: Subtask not found " + subtaskId);
     }
 
-    @Override
     public void printEpic(int epicId) {
         if (epics.containsKey(epicId)) {
             System.out.println(epics.get(epicId));
@@ -216,7 +251,6 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Ошибка printEpic: Epic not found " + epicId);
     }
 
-    @Override
     public void printAllTasks() {
         System.out.println("Задачи:");
         for (Task task : tasks.values()) {
@@ -238,13 +272,11 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void printAllSubtasks() {
         for (int subtaskId : subtasks.keySet())
             printSubtask(subtaskId);
     }
 
-    @Override
     public void printAllEpics() {
         for (int epicId : epics.keySet())
             printEpic(epicId);
@@ -255,7 +287,6 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager.getHistory();
     }
 
-    @Override
     public void printHistory() {
         System.out.println("История задач:");
         for (Task task : getHistory()) {
@@ -306,15 +337,5 @@ public class InMemoryTaskManager implements TaskManager {
             }
         } else
             System.out.println("Ошибка updateEpicStatus: Epic not found " + epicId);
-    }
-
-    public Set<Subtask> getAllSubtasksByEpicId(int epicId) {
-        if (epics.containsKey(epicId)) {
-            Set<Subtask> subtasksNew = new HashSet<>();
-            for (int subtaskId : epics.get(epicId).getSubtaskIds())
-                subtasksNew.add(subtasks.get(subtaskId));
-            return subtasksNew;
-        } else
-            return Collections.emptySet();
     }
 }

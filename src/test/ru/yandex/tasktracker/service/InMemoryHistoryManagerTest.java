@@ -15,12 +15,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InMemoryHistoryManagerTest {
 
-    public static Managers managers = new Managers();
-    public static TaskManager taskManager = managers.getDefault();
+    public static TaskManager taskManager = new InMemoryTaskManager(Managers.getDefaultHistory());
 
     @BeforeEach
     void setUp() {
-        taskManager.reset();
+        ((InMemoryTaskManager) taskManager).reset();
     }
 
     @Test
@@ -32,7 +31,7 @@ class InMemoryHistoryManagerTest {
         taskManager.createSubtask(new Subtask("Subtask-3", "Subtask-3",
                 Status.NEW, 1));
 
-        taskManager.reset();
+        ((InMemoryTaskManager) taskManager).reset();
 
         assertEquals(0, taskManager.getHistory().size());
     }

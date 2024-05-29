@@ -36,35 +36,23 @@ public interface TaskManager {
 
     void deleteAllEpics();
 
-    Set<Task> getTasks();
+    Set<Task> getAllTasks();
 
-    Set<Subtask> getSubtasks();
+    Set<Subtask> getAllSubtasks();
 
-    Set<Epic> getEpics();
-
-    void setTaskStatus(int taskId, @NotNull Status status);
-
-    void setSubtaskStatus(Integer subtaskId, Status status);
-
-    void setEpicStatus(int epicId, @NotNull Status status);
-
-    void printTask(int taskId);
-
-    void printSubtask(int SubtaskId);
-
-    void printEpic(int epicId);
-
-    void printAllTasks();
-
-    void printAllSubtasks();
-
-    void printAllEpics();
-
-    List<Task> getHistory();
-
-    void printHistory();
+    Set<Epic> getAllEpics();
 
     Set<Subtask> getAllSubtasksByEpicId(int epicId);
 
-    void reset();
+    void updateTask(int taskId, @NotNull Task task);
+
+    void updateSubtask(int subtaskId, @NotNull Subtask subtask);
+
+    void updateEpic(int epicId, @NotNull Epic epic);
+
+    void updateTaskStatus(int taskId, @NotNull Status status);
+
+    void updateSubtaskStatus(int subtaskId, @NotNull Status status);
+
+    List<Task> getHistory();
 }

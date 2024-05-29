@@ -15,6 +15,6 @@ public class Managers {
         return new InMemoryTaskManager(getDefaultHistory());
     }
 
-    public Managers() {
+    private Managers() {
     }
 }

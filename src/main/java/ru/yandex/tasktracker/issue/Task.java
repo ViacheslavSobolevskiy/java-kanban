@@ -18,27 +18,17 @@ public class Task {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Task task = (Task) o;
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other == null || getClass() != other.getClass()) return false;
+        Task task = (Task) other;
         return Objects.equals(description, task.description)
                 && Objects.equals(name, task.name)
                 && status == task.status;
     }
 
     @Override
-    public String toString() {
-        return  getId() + ","
-                + getName() + ","
-                + getStatus() + ","
-                + getDescription() + ",\n";
-    }
-
-    @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getId(), getName(), getStatus(),
-                getDescription());
+        return Objects.hash(id, name, status, description);
     }
 }

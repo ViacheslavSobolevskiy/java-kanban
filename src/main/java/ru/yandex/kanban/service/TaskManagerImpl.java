@@ -5,11 +5,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.yandex.kanban.issue.Epic;
-import ru.yandex.kanban.issue.Status;
-import ru.yandex.kanban.issue.Subtask;
-import ru.yandex.kanban.issue.Task;
-
+import ru.yandex.kanban.issue.*;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -51,6 +47,7 @@ public class TaskManagerImpl implements TaskManager {
      * @param task Задача, которая должна быть обновлена или создана.
      * @return Возвращает уникальный идентификатор обновленной или новой задачи.
      */
+    @Override
     public Long updateTask(@NonNull Task task) {
         // Логирование начала обновления задачи
         logger.debug("updateTask: Обновление Task {} ...", task);
@@ -76,6 +73,7 @@ public class TaskManagerImpl implements TaskManager {
      * @return Возвращает идентификатор обновленной подзадачи.
      * @throws IllegalArgumentException если Epic, связанный с Subtask, не найден.
      */
+    @Override
     public Long updateSubtask(@NonNull Subtask subtask) {
         // Логирование
         logger.debug("updateSubtask: Обновление Subtask {} ...", subtask);
@@ -120,6 +118,7 @@ public class TaskManagerImpl implements TaskManager {
      * @param epic Эпик, который необходимо обновить или создать. Не может быть null.
      * @return Возвращает идентификатор обновленного или нового эпика.
      */
+    @Override
     public Long updateEpic(@NonNull Epic epic) {
         // Логирование
         logger.debug("updateEpic: Обновление Epic ...");
@@ -144,6 +143,7 @@ public class TaskManagerImpl implements TaskManager {
      * @param taskId Идентификатор Task, который должен быть удален
      * @throws IllegalArgumentException если задача с указанным идентификатором не существует
      */
+    @Override
     public void removeTaskById(@NonNull Long taskId) {
         // Логирование
         logger.debug("removeTaskById: Удаление Task по ID {} ...", taskId);
@@ -175,6 +175,7 @@ public class TaskManagerImpl implements TaskManager {
      * @throws IllegalArgumentException Если подзадача с указанным идентификатором не существует.
      * @throws RuntimeException         Если связанный Epic для подзадачи не найден.
      */
+    @Override
     public void removeSubtaskById(@NonNull Long subtaskId) {
         // Логирование
         logger.debug("removeSubtaskById: Удаление Subtask по ID {} ...", subtaskId);
@@ -217,6 +218,7 @@ public class TaskManagerImpl implements TaskManager {
      * @param epicId Уникальный идентификатор эпика, который нужно удалить. Не может быть null.
      * @throws IllegalArgumentException Если эпик с указанным идентификатором не существует.
      */
+    @Override
     public void removeEpicById(@NonNull Long epicId) {
         // Логирование
         logger.debug("removeEpicById: Удаление Epic по ID {} ...", epicId);
@@ -245,6 +247,7 @@ public class TaskManagerImpl implements TaskManager {
      * @return Задача (Task), соответствующая указанному идентификатору.
      * @throws IllegalArgumentException Если задача с указанным идентификатором не существует в хранилище.
      */
+    @Override
     public Task getTaskById(@NonNull Long taskId) {
         // Логирование
         logger.debug("getTaskById: Получение Task по ID {}", taskId);
@@ -270,6 +273,7 @@ public class TaskManagerImpl implements TaskManager {
      * @return Возвращает объект Subtask, найденный по идентификатору.
      * @throws IllegalArgumentException Если подзадача с указанным идентификатором не найдена.
      */
+    @Override
     public Subtask getSubtaskById(@NonNull Long subtaskId) {
         // Логирование
         logger.debug("getSubtaskById: Получение Subtask по ID {}", subtaskId);
@@ -294,6 +298,7 @@ public class TaskManagerImpl implements TaskManager {
      * @return Возвращает объект Epic, найденный по указанному идентификатору.
      * @throws IllegalArgumentException Если эпик с указанным идентификатором не существует в хранилище.
      */
+    @Override
     public Epic getEpicById(@NonNull Long epicId) {
         // Логирование
         logger.debug("getEpicById: Получение Epic по ID {} ...", epicId);
@@ -321,6 +326,7 @@ public class TaskManagerImpl implements TaskManager {
      * 3. Проверку, что все задачи были успешно удалены. Если какие-либо задачи остались, выбрасывается исключение.
      * 4. Логирование завершения процесса удаления.
      */
+    @Override
     public void deleteAllTasks() {
         // Логирование
         logger.debug("deleteAllTasks: Удаление всех задач (Task) ...");
@@ -348,6 +354,7 @@ public class TaskManagerImpl implements TaskManager {
      *
      * @throws RuntimeException если не удалось удалить все подзадачи и коллекция subtasks осталась непустой.
      */
+    @Override
     public void deleteAllSubtasks() {
         // Логирование
         logger.debug("deleteAllSubtasks: Удаление всех подзадач (Subtask) ...");
@@ -375,6 +382,7 @@ public class TaskManagerImpl implements TaskManager {
      *
      * @throws RuntimeException если не удалось удалить все эпики и коллекция epics осталась непустой.
      */
+    @Override
     public void deleteAllEpics() {
         // Логирование
         logger.debug("deleteAllEpics: Удаление всех Эпиков (Epic) ...");
@@ -397,6 +405,7 @@ public class TaskManagerImpl implements TaskManager {
      *
      * @return Set уникальных идентификаторов задач (Task). Если задач нет, возвращается пустое множество.
      */
+    @Override
     public Set<Long> getAllTasks() {
         // Логирование
         logger.debug("getAllTasks: Получение всех задач (Task)");
@@ -411,6 +420,7 @@ public class TaskManagerImpl implements TaskManager {
      *
      * @return Set<Long> - Множество идентификаторов подзадач.
      */
+    @Override
     public Set<Long> getAllSubtasks() {
         // Запись действия в лог для отслеживания получения всех подзадач
         logger.debug("getAllSubtasks: Получение всех подзадач (Subtask)");
@@ -424,6 +434,7 @@ public class TaskManagerImpl implements TaskManager {
      *
      * @return Set<Long> - множество идентификаторов всех Эпиков.
      */
+    @Override
     public Set<Long> getAllEpics() {
         logger.debug("getAllEpics: Получение всех Эпиков (Epic)");
         return new HashSet<>(epics.keySet());
@@ -437,6 +448,7 @@ public class TaskManagerImpl implements TaskManager {
      * @return Set подзадач, связанных с Epic.
      * @throws IllegalArgumentException Если Epic с указанным идентификатором не существует.
      */
+    @Override
     public Set<Long> getAllSubtasksByEpicId(@NonNull Long epicId) {
         // Логирование начала метода и входного параметра
         logger.debug("getAllSubtasksByEpicId: Получение всех подзадач, связанных с Epic {}", epicId);
@@ -456,11 +468,12 @@ public class TaskManagerImpl implements TaskManager {
      *
      * @param taskId Номер идентификации задачи, для которой нужно обновить статус
      * @param status Новый статус задачи
-     * <p>
-     * Метод сначала проверяет, существует ли задача с указанным идентификатором в map tasks.
-     * Если задача существует, ее статус обновляется на переданный статус.
-     * Если задача не найдена, метод выбрасывает исключение IllegalArgumentException.
+     *               <p>
+     *               Метод сначала проверяет, существует ли задача с указанным идентификатором в map tasks.
+     *               Если задача существует, ее статус обновляется на переданный статус.
+     *               Если задача не найдена, метод выбрасывает исключение IllegalArgumentException.
      */
+    @Override
     public void updateTaskStatusById(@NonNull Long taskId, @NonNull Status status) {
         // Логирование начала обновления статуса задачи и указание задачи и новый статус
         logger.debug("updateTaskStatusById: Обновление статуса Task {} на {} ...", taskId, status);
@@ -480,6 +493,7 @@ public class TaskManagerImpl implements TaskManager {
     }
 
     // Обновление статуса подзадачи по ID
+    @Override
     public void updateSubtaskStatusById(@NonNull Long subtaskId, @NonNull Status status) {
         // Логирование
         logger.debug("updateSubtaskStatusById: Обновление статуса Subtask {} на {} ...", subtaskId, status);

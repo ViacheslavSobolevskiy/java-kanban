@@ -1,9 +1,15 @@
 package ru.yandex.kanban;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.yandex.kanban.issue.*;
 import ru.yandex.kanban.service.TaskManagerImpl;
 
+@Slf4j
 public class Main {
+    public static final Logger logger = LoggerFactory.getLogger(Main.class);
+
     public static void main(String[] args) {
         TaskManagerImpl taskManager = new TaskManagerImpl();
 
@@ -44,6 +50,15 @@ public class Main {
 
         taskManager.updateSubtask(new Subtask(3L, "Subtask-14", "Subtask-14", Status.DONE));
         taskManager.getEpicById(3L);
+
+        // Проверка авто-завершения эпика -
+        // Эпик 4 должен быть DONE
+        taskManager.updateSubtask(new Subtask(10L,4L, "Subtask-10", "Subtask-10", Status.DONE));
+        taskManager.updateSubtask(new Subtask(12L, 4L, "Subtask-12", "Subtask-12", Status.DONE));
+        taskManager.updateSubtask(new Subtask(13L,4L, "Subtask-13", "Subtask-13", Status.DONE));
+        if (taskManager.getEpicById(4L).getStatus() != Status.DONE) {
+            logger.error("Эпик 4 не завершен, а должен быть DONE");
+        }
 
         taskManager.deleteAllTasks();
         taskManager.deleteAllSubtasks();

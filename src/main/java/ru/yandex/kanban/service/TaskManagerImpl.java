@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @Getter
 public class TaskManagerImpl implements TaskManager {
     // Добавление поля logger
-    private static final Logger logger = LoggerFactory.getLogger(TaskManagerImpl.class);
+    public static final Logger logger = LoggerFactory.getLogger(TaskManagerImpl.class);
     // Счетчик для генерации уникальных идентификаторов задач
     private final AtomicLong uniqueId = new AtomicLong(0);
     // Хранилище эпиков (Epic)

@@ -1,6 +1,6 @@
-package ru.yandex.tasktracker.issue;
+package ru.yandex.kanban.issue;
 
-public enum IssueType {
+public enum Type {
     EPIC,
     TASK,
     SUBTASK

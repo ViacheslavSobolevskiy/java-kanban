@@ -9,5 +9,5 @@
         <appender-ref ref="CONSOLE" />
     </root>
 
-    <logger name="ru.yandex.kanban" level="DEBUG" />
+    <logger name="ru.yandex.kanban" level="INFO" />
 </configuration>

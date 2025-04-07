@@ -1,15 +1,9 @@
 package ru.yandex.kanban;
 
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.yandex.kanban.issue.*;
 import ru.yandex.kanban.service.TaskManagerImpl;
 
-@Slf4j
 public class Main {
-    public static final Logger logger = LoggerFactory.getLogger(Main.class);
-
     public static void main(String[] args) {
         TaskManagerImpl taskManager = new TaskManagerImpl();
 
@@ -22,15 +16,15 @@ public class Main {
          */
 
         // Создайте 2 задачи,
-        taskManager.updateTask(new Task(1L, "Task-1", "Task-1", Status.NEW));
-        taskManager.updateTask(new Task(2L, "Task-2", "Task-2", Status.NEW));
+        taskManager.createTask(new Task(1L, "Task-1", "Task-1", Status.NEW));
+        taskManager.createTask(new Task(2L, "Task-2", "Task-2", Status.NEW));
         // один эпик с 2 подзадачам,
-        taskManager.updateEpic(new Epic(3L, "Epic-3", "Epic-3", Status.NEW));
-        taskManager.updateSubtask(new Subtask(4L, 3L ,"Subtask-4", "Subtask-4", Status.NEW));
-        taskManager.updateSubtask(new Subtask(5L, 3L, "Subtask-5", "Subtask-5", Status.NEW));
+        taskManager.createEpic(new Epic(3L, "Epic-3", "Epic-3", Status.NEW));
+        taskManager.createSubtask(new Subtask(4L, 3L ,"Subtask-4", "Subtask-4", Status.NEW));
+        taskManager.createSubtask(new Subtask(5L, 3L, "Subtask-5", "Subtask-5", Status.NEW));
         // а другой эпик с 1 подзадачей.
-        taskManager.updateEpic(new Epic(6L, "Epic-6", "Epic-6", Status.NEW));
-        taskManager.updateSubtask(new Subtask(7L, 6L, "Subtask-7", "Subtask-7", Status.NEW));
+        taskManager.createEpic(new Epic(6L, "Epic-6", "Epic-6", Status.NEW));
+        taskManager.createSubtask(new Subtask(7L, 6L, "Subtask-7", "Subtask-7", Status.NEW));
 
         // Распечатайте списки эпиков,
         System.out.println("Список эпиков:");

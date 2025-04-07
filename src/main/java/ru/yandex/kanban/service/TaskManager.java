@@ -2,148 +2,77 @@ package ru.yandex.kanban.service;
 
 import lombok.NonNull;
 import ru.yandex.kanban.issue.Epic;
-import ru.yandex.kanban.issue.Status;
 import ru.yandex.kanban.issue.Subtask;
 import ru.yandex.kanban.issue.Task;
 
-import java.util.ArrayList;
-import java.util.Set;
+import java.util.List;
 
 public interface TaskManager {
     /**
-     * Вносит информацию о Task в TaskManager.
-     *
-     * @param task - который должен быть обновлен или создан.
-     * @return Возвращает уникальный идентификатор обновленной или новой задачи.
-     */
-    Long updateTask(@NonNull Task task);
+     * Возможность хранить задачи всех типов. Для этого вам нужно выбрать подходящую коллекцию.
+    Методы для каждого из типа задач (Задача/Эпик/Подзадача):
+    */
 
     /**
-     * Вносит информацию о Subtask в TaskManager.
-     *
-     * @param subtask - которую нужно обновить.
-     * @return Возвращает уникальный идентификатор обновленной подзадачи.
-     * @throws IllegalArgumentException если Epic, связанный с Subtask, не найден.
+     * Возможность хранить задачи всех типов. Для этого вам нужно выбрать подходящую коллекцию.
+     * Методы для каждого из типа задач - Задача:
      */
-    Long updateSubtask(@NonNull Subtask subtask);
-
-    /**
-     * Вносит информацию о Epic в TaskManager.
-     * Обновляет существующий Epic или создает новый, если он не существует.
-     *
-     * @param epic который необходимо обновить или создать.
-     * @return Возвращает идентификатор обновленного или нового эпика.
-     */
-    Long updateEpic(@NonNull Epic epic);
-
-    /**
-     * Удаляет Task по ID
-     *
-     * @param taskId Идентификатор Task
-     * @throws IllegalArgumentException если задача с указанным идентификатором не существует
-     */
+    // a. Получение списка всех задач.
+    List<Long> getAllTasks();
+    // b. Удаление всех задач.
+    void removeAllTasks();
+    // c. Получение по идентификатору.
+    Task getTaskById(@NonNull Long taskId);
+    // d. Создание. Сам объект должен передаваться в качестве параметра.
+    void createTask(@NonNull Task task);
+    // e. Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
+    void updateTask(@NonNull Task task);
+    // f. Удаление по идентификатору.
     void removeTaskById(@NonNull Long taskId);
 
     /**
-     * Удаляет подзадачу (Subtask) по её уникальному идентификатору.
-     *
-     * @param subtaskId идентификатор подзадачи
-     * @throws IllegalArgumentException Если подзадача с указанным идентификатором не существует.
-     * @throws RuntimeException         Если связанный Epic для подзадачи не найден.
+     * Возможность хранить задачи всех типов. Для этого вам нужно выбрать подходящую коллекцию.
+     * Методы для каждого из типа задач - Эпик:
      */
+    // a. Получение списка всех задач.
+    List<Long> getAllEpics();
+    // b. Удаление всех задач.
+    void removeAllEpics();
+    // c. Получение по идентификатору.
+    Epic getEpicById(@NonNull Long epicId);
+    // d. Создание. Сам объект должен передаваться в качестве параметра.
+    void createEpic(@NonNull Epic epic);
+    // e. Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
+    void updateEpic(@NonNull Epic epic);
+    // f. Удаление по идентификатору.
+    void removeEpicById(@NonNull Long epicId);
+    // Дополнительные методы:
+    // a. Получение списка всех подзадач определённого эпика.
+    List<Long> getAllSubtasksByEpicId(@NonNull Long epicId);
+
+    /**
+     * Возможность хранить задачи всех типов. Для этого вам нужно выбрать подходящую коллекцию.
+     * Методы для каждого из типа задач - Подзадача:
+     */
+    // a. Получение списка всех задач.
+    List<Long> getAllSubtasks();
+    // b. Удаление всех задач.
+    void removeAllSubtasks();
+    // c. Получение по идентификатору.
+    Subtask getSubtaskById(@NonNull Long subtaskId);
+    // d. Создание. Сам объект должен передаваться в качестве параметра.
+    void createSubtask(@NonNull Subtask subtask);
+    // e. Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
+    void updateSubtask(@NonNull Subtask subtask);
+    // f. Удаление по идентификатору.
     void removeSubtaskById(@NonNull Long subtaskId);
 
     /**
-     * Удаляет Epic (эпик) по уникальному идентификатору.
+     * ИТОГО: 19 публичных методов
      *
-     * @param epicId идентификатор эпика
-     * @throws IllegalArgumentException Если эпик с указанным идентификатором не существует.
+     * В соответствии с этим блоком тз всего в менеджере должно быть 18 публичных методов
+     * для модификации задач по типам,
+     * 1 публичный метод получения всех задач определенного эпика,
+     * Про управление статусами:
      */
-    void removeEpicById(@NonNull Long epicId);
-
-    /**
-     * Получения задачи (Task) по её уникальному идентификатору.
-     *
-     * @param taskId идентификатор задачи
-     * @return объект Task
-     * @throws IllegalArgumentException Если задача с указанным идентификатором не
-     *   существует в TaskManager
-     */
-    Task getTaskById(@NonNull Long taskId);
-
-    /**
-     * Получения Subtask по идентификатору.
-     *
-     * @param subtaskId идентификатор Subtask
-     * @return объект Subtask
-     * @throws IllegalArgumentException Если subtaskId не существует в TaskManager
-     */
-    Subtask getSubtaskById(@NonNull Long subtaskId);
-
-    /**
-     * Получения Epic по идентификатору.
-     *
-     * @param epicId идентификатор Epic
-     * @return объект Epic
-     * @throws IllegalArgumentException Если epicId не существует в TaskManager
-     */
-    Epic getEpicById(@NonNull Long epicId);
-
-    /**
-     * Удаление всех Task из TaskManager.
-     */
-    void deleteAllTasks();
-
-    /**
-     * Удаление всех Subtask из TaskManager.
-     */
-    void deleteAllSubtasks();
-
-    /**
-     * Удаление всех Epic из TaskManager.
-     */
-    void deleteAllEpics();
-
-    /**
-     * Получение Set идентификаторов всех Task.
-     *
-     * @return Set уникальных идентификаторов всех Task.
-     */
-    ArrayList<Long> getAllTasks();
-
-    /**
-     * Получение Set идентификаторов всех Subtask.
-     *
-     * @return Set уникальных идентификаторов всех Subtask.
-     */
-    ArrayList<Long> getAllSubtasks();
-
-    /**
-     * Получение Set идентификаторов всех Epic.
-     *
-     * @return Set уникальных идентификаторов всех Epic.
-     */
-    ArrayList<Long> getAllEpics();
-
-    /**
-     * Получение Set подзадач, связанные с определённым Epic.
-     *
-     * @param epicId Идентификатор Epic, для подзадачи.
-     * @return Set подзадач, связанных с Epic.
-     * @throws IllegalArgumentException Если Epic с указанным идентификатором не существует.
-     */
-    Set<Long> getAllSubtasksByEpicId(@NonNull Long epicId);
-
-    /**
-     * Обновление статуса задачи по ID
-     *
-     * @param taskId Номер идентификации задачи, для которой нужно обновить статус
-     * @param status Новый статус задачи
-     */
-    void updateTaskStatusById(@NonNull Long taskId, @NonNull Status status);
-
-    /**
-     * Обновление статуса Subtask по ID
-     */
-    void updateSubtaskStatusById(@NonNull Long subtaskId, @NonNull Status status);
 }

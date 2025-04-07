@@ -17,10 +17,9 @@ public class Epic extends Task {
     }
 
     public void removeSubtaskId(Long subtaskId) {
-        if (dependentSubtaskIds.contains(subtaskId)) {
+        if (dependentSubtaskIds.contains(subtaskId))
             dependentSubtaskIds.remove(subtaskId);
-        } else {
+        else
             throw new IllegalArgumentException("Subtask not found " + subtaskId);
-        }
     }
 }

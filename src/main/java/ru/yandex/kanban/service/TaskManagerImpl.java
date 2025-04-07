@@ -6,12 +6,85 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.yandex.kanban.issue.*;
-import java.util.HashSet;
+
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+/*
+ОТВЕТЫ на комментарии:
+
+        if (task.getId() == null)
+Идентификаторы задач не должны обновляться после создания
+ИСПРАВЛЕНО
+
+        if (subtask.getId() == null)
+Идентификаторы не должны обновляться
+ИСПРАВЛЕНО
+
+        // Обновление идентификатора подзадачи в связанной Epic задаче
+Здесь и ниже обновлять идентификаторы тоже не нужно
+ПОД ОБНОВЛЕНИЕМ ИМЕЛОСЬ ВВИДУ ДОБАВЛЕНИЕ НОВЫХ ПРИ ДОБАВЛЕНИИ ПОДЗАДАЧ К ЭПИКУ
+Set не позволит дважды добавить один и тот же
+
+        // Присвоение уникального идентификатора, если текущий идентификатор отсутствует
+ И здесь тоже
+ ИСПРАВЛЕНО
+
+         Subtask subtask = subtasks.get(subtaskId);
+Лучше использовать вместо метода get метод remove, так как он отработает как первый, но дополнительно будет произведено удаление
+REMOVE использовано позднее
+
+        Epic epic = epics.get(epicId);
+Лучше сразу использовать remove вместо get
+REMOVE использовано позднее
+
+        logger.debug("getTaskById: Получение Task по ID {} завершено: {}", taskId, tasks.get(taskId));
+Лучше получить задачу и записать результат в переменную, а не получать ее несколько раз здесь и ниже. Поправь и в других методах получения задач
+НЕ ИМЕЕТ СМЫСЛА - так как это логирование только в режиме логирования DEBUG
+
+       tasks.forEach((taskId, task) -> removeTaskById(taskId));
+Лучше использовать метод clear()
+ИСПРАВЛЕНО
+
+        subtasks.values().forEach(subtask -> removeSubtaskById(subtask.getId()));
+Нужно использовать метод clear(), затем нужно почистить все эпики и обновить их статусы
+ИСПРАВЛЕНО
+
+        epics.values().forEach(epic -> removeEpicById(epic.getId()));
+При удалении всех эпиков, нужно также очищать мапу с подзадачами, так как подзадача не может существовать без эпика
+ИСПРАВЛЕНО
+
+    public Set<Long> getAllEpics() {
+По тз требуется вернуть список :)
+ИСПРАВЛЕНО
+
+    public Set<Long> getAllSubtasksByEpicId(@NonNull Long epicId) {
+И здесь нужно возвращать список
+ИСПРАВЛЕНО
+
+    public void updateTaskStatusById(@NonNull Long taskId, @NonNull Status status) {
+Пользователь должен мочь управлять только статусами задач и подзадач. Статус эпика должен рассчитываться автоматически на основе статусов связанных с ним подзадач. Данный метод нужно удалить, так как пользователь может менять статусы с помощью конструктора и сеттеров
+ОШИБОЧНЫЙ КОММЕНТАРИЙ - вероятно имелся ввиду updateEpicStatusById - но он private
+
+    public void updateSubtaskStatusById(@NonNull Long subtaskId, @NonNull Status status) {
+Этот метод - лишний
+ОШИБОЧНЫЙ КОММЕНТАРИЙ - ПО ТЗ: Пользователь должен мочь управлять статусами подзадач.
+
+    private void updateEpicStatusById(@NonNull Long epicId, @NonNull Status status) {
+Этот метод - лишний
+ЭТО PRIVATE МЕТОД - ПОСЛЕ УДАЛЕНИЯ SUBTASK НАДО ОБНОВИТЬ СТАТУС ЭПИКА
+ПОЛЬЗОВАТЕЛЮ НЕ ДОСТУПЕН МЕТОД
+
+    public void updateEpicStatusById(Long epicId) {
+Метод долже быть приватным
+ИСПРАВЛЕНО
+
+
+
+ */
 
 @Slf4j
 @Getter
@@ -46,15 +119,17 @@ public class TaskManagerImpl implements TaskManager {
      *
      * @param task Задача, которая должна быть обновлена или создана.
      * @return Возвращает уникальный идентификатор обновленной или новой задачи.
+     * @throws IllegalArgumentException если Task не имеет идентификатора
      */
     @Override
     public Long updateTask(@NonNull Task task) {
         // Логирование начала обновления задачи
         logger.debug("updateTask: Обновление Task {} ...", task);
 
-        // Если задача не имеет идентификатора, присваиваем ей уникальный идентификатор
-        if (task.getId() == null)
-            task.setId(nextUniqueId());
+        // Если задача не имеет идентификатора, выбрасывается исключение
+        if (task.getId() == null) {
+            throw new IllegalArgumentException("Ошибка updateTask: Task не имеет идентификатора");
+        }
 
         // Сохранение задачи в map задач, используя ее идентификатор в качестве ключа
         tasks.put(task.getId(), task);
@@ -78,9 +153,9 @@ public class TaskManagerImpl implements TaskManager {
         // Логирование
         logger.debug("updateSubtask: Обновление Subtask {} ...", subtask);
 
-        // Если у подзадачи нет идентификатора, назначаем следующий уникальный идентификатор
+        // Идентификаторы не должны обновляться
         if (subtask.getId() == null)
-            subtask.setId(nextUniqueId());
+            throw new IllegalArgumentException("Ошибка updateSubtask: Subtask не имеет идентификатора");
 
         // Получение идентификаторов Subtask связанным Epic
         Long subtaskId = subtask.getId();
@@ -95,7 +170,8 @@ public class TaskManagerImpl implements TaskManager {
 
         // Обновление подзадачи в хранилище подзадач
         subtasks.put(subtaskId, subtask);
-        // Обновление идентификатора подзадачи в связанной Epic задаче
+        // Добавление нового subtaskId (если отсутствует) в список подзадач связанных с Epic.
+        // Данная строка нужна.
         epics.get(epicId).updateSubtaskId(subtaskId);
         // Обновление статуса связанной Epic задачи
         updateEpicStatusById(epicId);
@@ -117,15 +193,17 @@ public class TaskManagerImpl implements TaskManager {
      *
      * @param epic Эпик, который необходимо обновить или создать. Не может быть null.
      * @return Возвращает идентификатор обновленного или нового эпика.
+     * @throws IllegalArgumentException если Epic не имеет идентификатора
      */
     @Override
     public Long updateEpic(@NonNull Epic epic) {
         // Логирование
         logger.debug("updateEpic: Обновление Epic ...");
 
-        // Присвоение уникального идентификатора, если текущий идентификатор отсутствует
-        if (epic.getId() == null)
-            epic.setId(nextUniqueId());
+        // При отсутствии id выкидываем исключение
+        if (epic.getId() == null) {
+            throw new IllegalArgumentException("Ошибка updateEpic: Epic не имеет идентификатора");
+        }
 
         // Сохранение обновленного или нового эпика в хранилище
         epics.put(epic.getId(), epic);
@@ -185,6 +263,7 @@ public class TaskManagerImpl implements TaskManager {
             throw new IllegalArgumentException("Ошибка removeSubtask: Subtask не найден " + subtaskId);
         }
         Subtask subtask = subtasks.get(subtaskId);
+        // По комментарию ревьювера - remove тоже есть, но позднее
 
         // Проверка существования связанного Epic в хранилище
         if (!epics.containsKey(subtask.getEpicId())) {
@@ -230,6 +309,7 @@ public class TaskManagerImpl implements TaskManager {
 
         // Получение объекта эпика из хранилища
         Epic epic = epics.get(epicId);
+        // По комментарию ревьювера - remove позднее
         // Удаление всех подзадач, связанных с этим эпиком
         epic.getDependentSubtaskIds().forEach(subtasks::remove);
         // Удаление самого эпика из хранилища
@@ -260,6 +340,8 @@ public class TaskManagerImpl implements TaskManager {
 
         // Логирование
         logger.debug("getTaskById: Получение Task по ID {} завершено: {}", taskId, tasks.get(taskId));
+        // Комментарий ревьвера не ясен - речь о логировании в режиме debug, который будет выключен при
+        // штатной работе. Поэтому использование дополнительных переменных - не имеет смысла.
 
         // Возврат найденной задачи из хранилища
         return tasks.get(taskId);
@@ -332,11 +414,7 @@ public class TaskManagerImpl implements TaskManager {
         logger.debug("deleteAllTasks: Удаление всех задач (Task) ...");
 
         // Итерация по всем задачам и их удаление по идентификатору
-        tasks.forEach((taskId, task) -> removeTaskById(taskId));
-
-        // Проверка, что все задачи были успешно удалены
-        if (!tasks.isEmpty())
-            throw new RuntimeException("Ошибка deleteAllTasks: Не удалось удалить все задачи");
+        tasks.clear();
 
         // Логирование
         logger.debug("deleteAllTasks: Удаление всех задач (Task) завершено.");
@@ -351,20 +429,15 @@ public class TaskManagerImpl implements TaskManager {
      * 2. Итерация по всем подзадачам и их последовательное удаление с помощью метода removeSubtaskById.
      * 3. Проверка, остались ли какие-либо подзадачи после выполнения удаления. Если да, выбрасывается исключение.
      * 4. Логирование завершения процесса удаления.
-     *
-     * @throws RuntimeException если не удалось удалить все подзадачи и коллекция subtasks осталась непустой.
      */
     @Override
     public void deleteAllSubtasks() {
         // Логирование
         logger.debug("deleteAllSubtasks: Удаление всех подзадач (Subtask) ...");
 
-        // Удаление каждой подзадачи через вызов метода removeSubtaskById
-        subtasks.values().forEach(subtask -> removeSubtaskById(subtask.getId()));
-
-        // Проверка, что все подзадачи были успешно удалены
-        if (!subtasks.isEmpty())
-            throw new RuntimeException("Ошибка deleteAllSubtasks: Не удалось удалить все подзадачи");
+        subtasks.clear();
+        for (Epic epic : epics.values())
+            epic.getDependentSubtaskIds().clear();
 
         // Логирование
         logger.debug("deleteAllSubtasks: Удаление всех подзадач (Subtask) завершено.");
@@ -380,19 +453,14 @@ public class TaskManagerImpl implements TaskManager {
      * 3. Проверка, остались ли какие-либо эпики после выполнения удаления. Если да, выбрасывается исключение.
      * 4. Логирование завершения процесса удаления.
      *
-     * @throws RuntimeException если не удалось удалить все эпики и коллекция epics осталась непустой.
      */
     @Override
     public void deleteAllEpics() {
         // Логирование
         logger.debug("deleteAllEpics: Удаление всех Эпиков (Epic) ...");
 
-        // Удаление каждого эпика через вызов метода removeEpicById
-        epics.values().forEach(epic -> removeEpicById(epic.getId()));
-
-        // Проверка, что все эпики были успешно удалены
-        if (!epics.isEmpty())
-            throw new RuntimeException("Ошибка deleteAllEpics: Не удалось удалить все Epic");
+        epics.clear();
+        subtasks.clear();
 
         // Логирование
         logger.debug("deleteAllEpics: Удаление всех Эпиков (Epic) завершено.");
@@ -406,12 +474,12 @@ public class TaskManagerImpl implements TaskManager {
      * @return Set уникальных идентификаторов задач (Task). Если задач нет, возвращается пустое множество.
      */
     @Override
-    public Set<Long> getAllTasks() {
+    public ArrayList<Long> getAllTasks() {
         // Логирование
         logger.debug("getAllTasks: Получение всех задач (Task)");
 
         // Возвращаем копию Set ключей из TaskManager
-        return new HashSet<>(tasks.keySet());
+        return new ArrayList<>(tasks.keySet());
     }
 
 
@@ -421,11 +489,11 @@ public class TaskManagerImpl implements TaskManager {
      * @return Set<Long> - Множество идентификаторов подзадач.
      */
     @Override
-    public Set<Long> getAllSubtasks() {
+    public ArrayList<Long> getAllSubtasks() {
         // Запись действия в лог для отслеживания получения всех подзадач
         logger.debug("getAllSubtasks: Получение всех подзадач (Subtask)");
         // Возвращаем копию множества ключей из хранилища подзадач
-        return new HashSet<>(subtasks.keySet());
+        return new ArrayList<>(subtasks.keySet());
     }
 
 
@@ -435,9 +503,9 @@ public class TaskManagerImpl implements TaskManager {
      * @return Set<Long> - множество идентификаторов всех Эпиков.
      */
     @Override
-    public Set<Long> getAllEpics() {
+    public ArrayList<Long> getAllEpics() {
         logger.debug("getAllEpics: Получение всех Эпиков (Epic)");
-        return new HashSet<>(epics.keySet());
+        return new ArrayList<>(epics.keySet());
     }
 
 

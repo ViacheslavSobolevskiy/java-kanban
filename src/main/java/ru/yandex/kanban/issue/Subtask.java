@@ -6,13 +6,8 @@ import lombok.Getter;
 public class Subtask extends Task {
     private final Long epicId;
 
-    public Subtask(Long epicId, String name, String description, Status status) {
-        super(name, description, status);
-        this.epicId = epicId;
-    }
-
     public Subtask(Long id, Long epicId, String name, String description, Status status) {
-        super(name, description, status);
+        super(id, name, description, status);
         this.id = id;
         this.epicId = epicId;
     }

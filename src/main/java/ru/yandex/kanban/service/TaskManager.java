@@ -6,6 +6,7 @@ import ru.yandex.kanban.issue.Status;
 import ru.yandex.kanban.issue.Subtask;
 import ru.yandex.kanban.issue.Task;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 public interface TaskManager {
@@ -108,21 +109,21 @@ public interface TaskManager {
      *
      * @return Set уникальных идентификаторов всех Task.
      */
-    Set<Long> getAllTasks();
+    ArrayList<Long> getAllTasks();
 
     /**
      * Получение Set идентификаторов всех Subtask.
      *
      * @return Set уникальных идентификаторов всех Subtask.
      */
-    Set<Long> getAllSubtasks();
+    ArrayList<Long> getAllSubtasks();
 
     /**
      * Получение Set идентификаторов всех Epic.
      *
      * @return Set уникальных идентификаторов всех Epic.
      */
-    Set<Long> getAllEpics();
+    ArrayList<Long> getAllEpics();
 
     /**
      * Получение Set подзадач, связанные с определённым Epic.

@@ -55,9 +55,9 @@ public class TaskManagerImpl implements TaskManager {
 
     @Override
     public void updateTask(@NonNull Task task) {
-        if (task.getId() == null) {
-            throw new IllegalArgumentException("Ошибка updateTask: Task не имеет идентификатора");
-        }
+        if (task.getId() == null)
+            throw new RuntimeException("Ошибка updateTask: Task не имеет идентификатора");
+
         tasks.put(task.getId(), task);
     }
 

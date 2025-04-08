@@ -18,7 +18,7 @@ public interface TaskManager {
      * Методы для каждого из типа задач - Задача:
      */
     // a. Получение списка всех задач.
-    List<Long> getAllTasks();
+    List<Task> getAllTasks();
     // b. Удаление всех задач.
     void removeAllTasks();
     // c. Получение по идентификатору.
@@ -35,7 +35,7 @@ public interface TaskManager {
      * Методы для каждого из типа задач - Эпик:
      */
     // a. Получение списка всех задач.
-    List<Long> getAllEpics();
+    List<Epic> getAllEpics();
     // b. Удаление всех задач.
     void removeAllEpics();
     // c. Получение по идентификатору.
@@ -46,16 +46,14 @@ public interface TaskManager {
     void updateEpic(@NonNull Epic epic);
     // f. Удаление по идентификатору.
     void removeEpicById(@NonNull Long epicId);
-    // Дополнительные методы:
-    // a. Получение списка всех подзадач определённого эпика.
-    List<Long> getAllSubtasksByEpicId(@NonNull Long epicId);
+
 
     /**
      * Возможность хранить задачи всех типов. Для этого вам нужно выбрать подходящую коллекцию.
      * Методы для каждого из типа задач - Подзадача:
      */
     // a. Получение списка всех задач.
-    List<Long> getAllSubtasks();
+    List<Subtask> getAllSubtasks();
     // b. Удаление всех задач.
     void removeAllSubtasks();
     // c. Получение по идентификатору.
@@ -67,12 +65,8 @@ public interface TaskManager {
     // f. Удаление по идентификатору.
     void removeSubtaskById(@NonNull Long subtaskId);
 
-    /**
-     * ИТОГО: 19 публичных методов
-     *
-     * В соответствии с этим блоком тз всего в менеджере должно быть 18 публичных методов
-     * для модификации задач по типам,
-     * 1 публичный метод получения всех задач определенного эпика,
-     * Про управление статусами:
-     */
+    // Дополнительные методы:
+    // a. Получение списка всех подзадач определённого эпика.
+    List<Subtask> getAllSubtasksByEpicId(@NonNull Long epicId);
+
 }

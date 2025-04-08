@@ -64,13 +64,12 @@ public class TaskManagerImpl implements TaskManager {
     @Override
     public void updateSubtask(@NonNull Subtask subtask) {
         Long subtaskId = subtask.getId();
-        if (subtaskId == null) {
-            throw new IllegalArgumentException("Ошибка updateSubtask: Subtask не имеет идентификатора");
-        }
+        if (subtaskId == null)
+            throw new RuntimeException("Ошибка updateSubtask: Subtask не имеет идентификатора");
 
         Long epicId = subtask.getEpicId();
         if (!epics.containsKey(epicId)) {
-            throw new IllegalArgumentException("Ошибка updateSubtask: Epic " + epicId +
+            throw new RuntimeException("Ошибка updateSubtask: Epic " + epicId +
                     "не найден для Subtask " + subtaskId);
         }
 

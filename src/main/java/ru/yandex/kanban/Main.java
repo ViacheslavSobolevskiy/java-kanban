@@ -28,13 +28,13 @@ public class Main {
 
         // Распечатайте списки эпиков,
         System.out.println("Список эпиков:");
-        System.out.println(taskManager.getEpics());
+        System.out.println(taskManager.getAllEpics());
         // задач и подзадач,
         System.out.println("Списки задач:");
-        System.out.println(taskManager.getTasks());
+        System.out.println(taskManager.getAllTasks());
         // и подзадач через `System.out.println(..)`.
         System.out.println("Списки подзадач:");
-        System.out.println(taskManager.getSubtasks());
+        System.out.println(taskManager.getAllSubtasks());
 
         // Измените статусы созданных объектов
         taskManager.updateTaskStatusById(1L, Status.IN_PROGRESS);
@@ -44,11 +44,11 @@ public class Main {
         taskManager.updateSubtaskStatusById(7L, Status.DONE);
         // Распечатайте.
         System.out.println("Список эпиков:");
-        System.out.println(taskManager.getEpics());
+        System.out.println(taskManager.getAllEpics());
         System.out.println("Списки задач:");
-        System.out.println(taskManager.getTasks());
+        System.out.println(taskManager.getAllTasks());
         System.out.println("Списки подзадач:");
-        System.out.println(taskManager.getSubtasks());
+        System.out.println(taskManager.getAllSubtasks());
         // Проверьте, что статус задачи
         if (taskManager.getTaskById(1L).getStatus() != Status.IN_PROGRESS) {
             throw new IllegalStateException("Неверно обновился статус задачи");
@@ -82,11 +82,11 @@ public class Main {
 
         // Смотрим, что осталось.
         System.out.println("Список эпиков:");
-        System.out.println(taskManager.getEpics());
+        System.out.println(taskManager.getAllEpics());
         System.out.println("Списки задач:");
-        System.out.println(taskManager.getTasks());
+        System.out.println(taskManager.getAllTasks());
         System.out.println("Списки подзадач:");
-        System.out.println(taskManager.getSubtasks());
+        System.out.println(taskManager.getAllSubtasks());
 
         /*
          * Ответ:

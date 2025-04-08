@@ -81,9 +81,9 @@ public class TaskManagerImpl implements TaskManager {
 
     @Override
     public void updateEpic(@NonNull Epic epic) {
-        if (epic.getId() == null) {
-            throw new IllegalArgumentException("Ошибка updateEpic: Epic не имеет идентификатора");
-        }
+        if (epic.getId() == null)
+            throw new RuntimeException("Ошибка updateEpic: Epic не имеет идентификатора");
+
         epics.put(epic.getId(), epic);
     }
 

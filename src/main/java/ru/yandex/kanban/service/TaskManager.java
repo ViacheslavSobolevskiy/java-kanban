@@ -2,7 +2,6 @@ package ru.yandex.kanban.service;
 
 import lombok.NonNull;
 import ru.yandex.kanban.issue.Epic;
-import ru.yandex.kanban.issue.Status;
 import ru.yandex.kanban.issue.Subtask;
 import ru.yandex.kanban.issue.Task;
 
@@ -25,7 +24,7 @@ public interface TaskManager {
     // c. Получение по идентификатору.
     Task getTaskById(@NonNull Long taskId);
     // d. Создание. Сам объект должен передаваться в качестве параметра.
-    Long createTask(@NonNull Task epic);
+    Long createTask(@NonNull Task task);
     // e. Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
     void updateTask(@NonNull Task task);
     // f. Удаление по идентификатору.

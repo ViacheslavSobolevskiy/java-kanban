@@ -47,11 +47,11 @@ public class Main {
 
         // Измените статусы созданных объектов
         System.out.println("Измените статусы созданных объектов");
-        taskManager.updateTaskStatusById(taskId0, Status.IN_PROGRESS);
-        taskManager.updateTaskStatusById(taskId1, Status.DONE);
-        taskManager.updateSubtaskStatusById(subtaskId3, Status.DONE);
-        taskManager.updateSubtaskStatusById(subtaskId4, Status.IN_PROGRESS);
-        taskManager.updateSubtaskStatusById(subtaskId6, Status.DONE);
+        taskManager.updateTask(new Task(taskId0, "Task-00", "Task-00" ,Status.IN_PROGRESS));
+        taskManager.updateTask(new Task(taskId1, "Task-11", "Task-11" ,Status.DONE));
+        taskManager.updateSubtask(new Subtask(epicId2, subtaskId3, "Subtask-33", "Subtask-33" ,Status.DONE));
+        taskManager.updateSubtask(new Subtask(epicId2, subtaskId4, "Subtask-44", "Subtask-44" ,Status.IN_PROGRESS));
+        taskManager.updateSubtask(new Subtask(epicId5, subtaskId6, "Subtask-66", "Subtask-66" ,Status.DONE));
 
         // Распечатайте.
         System.out.println("Распечатайте.");
@@ -101,13 +101,10 @@ public class Main {
                 Проверено. Все отработало штатно
                 """);
 
-        // Иные проверки
-        taskManager.updateTask(new Task(taskId1, null, null, Status.NEW));
+        System.out.println("Все вычистили");
 
-        Epic updatedEpic = taskManager.getEpicById(epicId2);
-        updatedEpic.setName(null);
-        updatedEpic.setDescription(null);
-        taskManager.updateEpic(updatedEpic);
+        taskManager.removeAllTasks();
+        taskManager.removeAllEpics();
 
         printTaskManager(taskManager);
     }

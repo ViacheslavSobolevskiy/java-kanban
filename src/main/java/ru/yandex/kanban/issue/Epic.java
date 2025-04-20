@@ -6,10 +6,6 @@ import lombok.NonNull;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Эпик. Это задача, которая состоит из подзадач.
- * Каждый эпик может содержать несколько подзадач, и каждая подзадача может принадлежать только одному эпику.
- */
 @Getter
 public class Epic extends Task {
     private final Set<Long> dependentSubtaskIds = new HashSet<>();

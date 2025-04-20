@@ -150,7 +150,6 @@ public class TaskManagerImpl implements TaskManager {
                     "не найден для Subtask " + subtaskId);
 
         subtasks.put(subtaskId, subtask);
-        epics.get(epicId).addSubtaskId(subtaskId);
         refreshEpicStatusById(epicId);
         validateStackConsistency();
     }
@@ -305,27 +304,6 @@ public class TaskManagerImpl implements TaskManager {
         return epics.get(epicId).getDependentSubtaskIds().stream()
                 .map(subtasks::get)
                 .collect(Collectors.toList());
-    }
-
-    public void updateTaskStatusById(@NonNull Long taskId, @NonNull Status status) {
-        if (!tasks.containsKey(taskId))
-            throw new IllegalArgumentException("Ошибка updateTaskStatus: Task не найден " + taskId);
-
-        tasks.get(taskId).setStatus(status);
-    }
-
-    public void updateSubtaskStatusById(@NonNull Long subtaskId, @NonNull Status status) {
-        Subtask subtask = subtasks.get(subtaskId);
-        if (subtask == null)
-            throw new RuntimeException("Ошибка updateSubtaskStatus: Subtask не найден " + subtaskId);
-
-        Epic epic = epics.get(subtask.getEpicId());
-        if (epic == null)
-            throw new RuntimeException("Ошибка updateSubtaskStatus: Epic не найден для Subtask " + subtaskId);
-
-        subtask.setStatus(status);
-        refreshEpicStatusById(epic.getId());
-        validateStackConsistency();
     }
 
     private Long checkIfExists(@NonNull Long id) {

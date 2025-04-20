@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 @Getter
 public class TaskManagerImpl implements TaskManager {
     private final AtomicLong uniqueId = new AtomicLong();
-    public final Map<Long, Epic> epics = new HashMap<>();
-    public final Map<Long, Task> tasks = new HashMap<>();
-    public final Map<Long, Subtask> subtasks = new HashMap<>();
+    private final Map<Long, Epic> epics = new HashMap<>();
+    private final Map<Long, Task> tasks = new HashMap<>();
+    private final Map<Long, Subtask> subtasks = new HashMap<>();
 
     public TaskManagerImpl() {
     }

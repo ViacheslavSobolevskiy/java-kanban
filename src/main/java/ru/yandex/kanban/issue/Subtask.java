@@ -1,14 +1,15 @@
 package ru.yandex.kanban.issue;
 
 import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class Subtask extends Task {
-    private final Long epicId;
+    private Long epicId; // Вероятно может меняться
 
-    public Subtask(Long id, Long epicId, String name, String description, Status status) {
-        super(id, name, description, status);
-        this.id = id;
-        this.epicId = epicId;
+    public Subtask(String name, String description, @NonNull Status status) {
+        super(name, description, status);
     }
 }

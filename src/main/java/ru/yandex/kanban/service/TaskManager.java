@@ -2,6 +2,7 @@ package ru.yandex.kanban.service;
 
 import lombok.NonNull;
 import ru.yandex.kanban.issue.Epic;
+import ru.yandex.kanban.issue.Status;
 import ru.yandex.kanban.issue.Subtask;
 import ru.yandex.kanban.issue.Task;
 
@@ -24,7 +25,7 @@ public interface TaskManager {
     // c. Получение по идентификатору.
     Task getTaskById(@NonNull Long taskId);
     // d. Создание. Сам объект должен передаваться в качестве параметра.
-    void createTask(@NonNull Task task);
+    Long createTask(@NonNull Task epic);
     // e. Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
     void updateTask(@NonNull Task task);
     // f. Удаление по идентификатору.
@@ -41,7 +42,7 @@ public interface TaskManager {
     // c. Получение по идентификатору.
     Epic getEpicById(@NonNull Long epicId);
     // d. Создание. Сам объект должен передаваться в качестве параметра.
-    void createEpic(@NonNull Epic epic);
+    Long createEpic(@NonNull Epic epic);
     // e. Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
     void updateEpic(@NonNull Epic epic);
     // f. Удаление по идентификатору.
@@ -59,7 +60,7 @@ public interface TaskManager {
     // c. Получение по идентификатору.
     Subtask getSubtaskById(@NonNull Long subtaskId);
     // d. Создание. Сам объект должен передаваться в качестве параметра.
-    void createSubtask(@NonNull Subtask subtask);
+    Long createSubtask(@NonNull Long epicId, @NonNull Subtask subtask);
     // e. Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
     void updateSubtask(@NonNull Subtask subtask);
     // f. Удаление по идентификатору.

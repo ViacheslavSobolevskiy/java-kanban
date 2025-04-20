@@ -1,20 +1,39 @@
 package ru.yandex.kanban.issue;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+
 import java.util.Objects;
 
-@Data
+@Getter
+@Setter
 public class Task {
-    protected Long id;
-    protected String name;
-    protected String description;
-    protected Status status;
-    public Task(Long id, String name, String description, Status status) {
+    private Long id;
+    private String name;
+    private String description;
+    private Status status;
+
+    public Task(String name, String description, @NonNull Status status) {
+        this.name = name;
+        this.description = description;
+        this.status = status;
+    }
+
+    public Task(@NonNull Long id, String name, String description, @NonNull Status status) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
     }
+
+    public Task(@NonNull Long id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.status = Status.NEW;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -22,6 +41,7 @@ public class Task {
         Task task = (Task) other;
         return Objects.equals(id, task.id);
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(id, name, status, description);

@@ -8,21 +8,27 @@ import ru.yandex.kanban.issue.Subtask;
 import ru.yandex.kanban.issue.Task;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Getter
 public class TaskManagerImpl implements TaskManager {
-    private final Map<Long, Epic> epics = new HashMap<>();
-    private final Map<Long, Task> tasks = new HashMap<>();
-    private final Map<Long, Subtask> subtasks = new HashMap<>();
+    private final AtomicLong uniqueId = new AtomicLong();
+    public final Map<Long, Epic> epics = new HashMap<>();
+    public final Map<Long, Task> tasks = new HashMap<>();
+    public final Map<Long, Subtask> subtasks = new HashMap<>();
 
     public TaskManagerImpl() {
     }
 
-    private void refreshEpicStatusById(@NonNull Epic epic) {
+    private void refreshEpicStatusById(@NonNull Long epicId) {
+        Epic epic = epics.get(epicId);
+        if (epic == null)
+            throw new RuntimeException("Ошибка refreshEpicStatusById: Epic не найден " + epicId);
+
         Set<Long> subtaskIds = epic.getDependentSubtaskIds();
 
-        if (subtaskIds == null || subtaskIds.isEmpty()) {
+        if (subtaskIds.isEmpty()) {
             epic.setStatus(Status.NEW);
             return;
         }
@@ -53,37 +59,111 @@ public class TaskManagerImpl implements TaskManager {
         }
     }
 
+    private void validateStackConsistency() {
+        validateAllKeysUnique();
+
+        if (!subtasks.isEmpty() && epics.isEmpty())
+            throw new RuntimeException("Ошибка validateStackConsistency: Subtasks не имеют Epic");
+
+        if (epics.isEmpty())
+            return;
+
+        for (Epic epic : epics.values())
+            validateEpicConsistencyById(epic.getId());
+
+        for (Subtask subtask : subtasks.values()) {
+            if (subtask.getEpicId() == null)
+                throw new RuntimeException("Ошибка validateStackConsistency: Subtask " + subtask.getId() +
+                        " не имеет идентификатора Epic");
+            if (!epics.containsKey(subtask.getEpicId()))
+                throw new RuntimeException("Ошибка validateStackConsistency: Subtask " + subtask.getId() +
+                        " имеет несуществующий идентификатор Epic " + subtask.getEpicId());
+        }
+    }
+
+    private void validateEpicConsistencyById(@NonNull Long epicId) {
+        Epic epic = epics.get(epicId);
+        if (epic == null)
+            throw new RuntimeException("Ошибка validateEpicConsistencyById: Epic не найден " + epicId);
+
+        if (epic.getDependentSubtaskIds().isEmpty()) {
+            if (epic.getStatus() != Status.NEW)
+                throw new RuntimeException("Ошибка validateEpicConsistencyById: Epic " + epicId +
+                        " не имеет подзадач и не имеет статуса NEW");
+            return;
+        }
+
+        for (Long subtaskId : epic.getDependentSubtaskIds()) {
+            Subtask subtask = subtasks.get(subtaskId);
+            if (subtask == null)
+                throw new RuntimeException("Ошибка validateEpicConsistencyById: Subtask не найден " + subtaskId);
+            if (!Objects.equals(subtask.getEpicId(), epic.getId()))
+                throw new RuntimeException("Ошибка validateEpicConsistencyById: Subtask " + subtaskId +
+                        " не принадлежит Epic " + epic.getId());
+        }
+
+        int min_status = Status.DONE.ordinal();
+        for (Long subtaskId : epic.getDependentSubtaskIds()) {
+            int status = subtasks.get(subtaskId).getStatus().ordinal();
+            if (status < min_status)
+                min_status = status;
+        }
+
+        if (epics.get(epicId).getStatus().ordinal() != min_status)
+            throw new RuntimeException("Ошибка validateEpicConsistencyById: Epic " + epicId +
+                    " имеет несогласованный статус");
+    }
+
+    /**
+     * Проверяет, что среди всех ключей epics, tasks, subtasks нет пересечений.
+     * Если есть дублирующиеся ключи — выбрасывает RuntimeException с описанием.
+     */
+    private void validateAllKeysUnique() {
+        Set<Long> allKeys = new HashSet<>();
+        allKeys.addAll(epics.keySet());
+        allKeys.addAll(tasks.keySet());
+        allKeys.addAll(subtasks.keySet());
+        int total = epics.size() + tasks.size() + subtasks.size();
+        if (allKeys.size() != total) {
+            throw new RuntimeException("Обнаружены неуникальные ключи среди epics, tasks и subtasks");
+        }
+    }
+
     @Override
     public void updateTask(@NonNull Task task) {
         if (task.getId() == null)
-            throw new RuntimeException("Ошибка updateTask: Task не имеет идентификатора");
+            throw new IllegalArgumentException("Ошибка updateTask: Task не имеет идентификатора");
 
         tasks.put(task.getId(), task);
+        validateStackConsistency();
     }
 
     @Override
     public void updateSubtask(@NonNull Subtask subtask) {
         Long subtaskId = subtask.getId();
         if (subtaskId == null)
-            throw new RuntimeException("Ошибка updateSubtask: Subtask не имеет идентификатора");
+            throw new IllegalArgumentException("Ошибка updateSubtask: Subtask не имеет идентификатора");
 
         Long epicId = subtask.getEpicId();
-        if (!epics.containsKey(epicId)) {
+        if (!epics.containsKey(epicId))
             throw new RuntimeException("Ошибка updateSubtask: Epic " + epicId +
                     "не найден для Subtask " + subtaskId);
-        }
 
         subtasks.put(subtaskId, subtask);
-        epics.get(epicId).updateSubtaskId(subtaskId);
-        refreshEpicStatusById(epics.get(epicId));
+        epics.get(epicId).addSubtaskId(subtaskId);
+        refreshEpicStatusById(epicId);
+        validateStackConsistency();
     }
 
     @Override
     public void updateEpic(@NonNull Epic epic) {
-        if (epic.getId() == null)
-            throw new RuntimeException("Ошибка updateEpic: Epic не имеет идентификатора");
+        Long epicId = epic.getId();
+        if (epicId == null)
+            throw new IllegalArgumentException("Ошибка updateEpic: Epic не имеет идентификатора");
 
         epics.put(epic.getId(), epic);
+        refreshEpicStatusById(epic.getId());
+        validateStackConsistency();
     }
 
     @Override
@@ -105,8 +185,9 @@ public class TaskManagerImpl implements TaskManager {
 
         Epic epic = epics.get(epicId);
         epic.removeSubtaskId(subtaskId);
-        refreshEpicStatusById(epic);
+        refreshEpicStatusById(epicId);
         subtasks.remove(subtaskId);
+        validateStackConsistency();
     }
 
     @Override
@@ -115,6 +196,7 @@ public class TaskManagerImpl implements TaskManager {
             throw new IllegalArgumentException("Ошибка removeEpic: Epic не найден " + epicId);
 
         epics.remove(epicId).getDependentSubtaskIds().forEach(subtasks::remove);
+        validateStackConsistency();
     }
 
     public Task getTaskById(@NonNull Long taskId) {
@@ -141,18 +223,45 @@ public class TaskManagerImpl implements TaskManager {
     }
 
     @Override
-    public void createTask(@NonNull Task task) {
-        updateTask(task);
+    public Long createTask(@NonNull Task task) {
+
+        Long taskId = checkIfExists(uniqueId.getAndIncrement());
+        task.setId(taskId);
+        tasks.put(taskId, task);
+
+        return taskId;
     }
 
     @Override
-    public void createSubtask(@NonNull Subtask subtask) {
-        updateSubtask(subtask);
+    public Long createSubtask(@NonNull Long epicId, @NonNull Subtask subtask) {
+        if (!epics.containsKey(epicId))
+            throw new IllegalArgumentException("Ошибка createSubtask: Epic не найден " + epicId);
+        if (subtask.getEpicId() != null)
+            throw new IllegalArgumentException("Ошибка createSubtask: Subtask уже имеет идентификатор Epic");
+        if (subtask.getId() != null)
+            throw new IllegalArgumentException("Ошибка createSubtask: Subtask уже имеет идентификатор");
+
+        Long subtaskId = checkIfExists(uniqueId.getAndIncrement());
+        subtask.setId(subtaskId);
+        subtask.setEpicId(epicId);
+        subtasks.put(subtaskId, subtask);
+        epics.get(epicId).addSubtaskId(subtaskId);
+        refreshEpicStatusById(epicId);
+        validateStackConsistency();
+
+        return subtaskId;
     }
 
     @Override
-    public void createEpic(@NonNull Epic epic) {
-        updateEpic(epic);
+    public Long createEpic(@NonNull Epic epic) {
+        if (epic.getId() != null)
+            throw new IllegalArgumentException("Ошибка createEpic: Epic уже имеет идентификатор");
+
+        Long epicId = checkIfExists(uniqueId.getAndIncrement());
+        epic.setId(epicId);
+        epics.put(epicId, epic);
+
+        return epicId;
     }
 
     public void removeAllTasks() {
@@ -169,8 +278,8 @@ public class TaskManagerImpl implements TaskManager {
 
     @Override
     public void removeAllEpics() {
-            subtasks.clear();
-            epics.clear();
+        subtasks.clear();
+        epics.clear();
     }
 
     @Override
@@ -206,16 +315,29 @@ public class TaskManagerImpl implements TaskManager {
     }
 
     public void updateSubtaskStatusById(@NonNull Long subtaskId, @NonNull Status status) {
-        if (!subtasks.containsKey(subtaskId))
-            throw new IllegalArgumentException("Ошибка updateSubtaskStatus: Subtask не найден " + subtaskId);
-
         Subtask subtask = subtasks.get(subtaskId);
-        Epic epic = epics.get(subtask.getEpicId());
+        if (subtask == null)
+            throw new RuntimeException("Ошибка updateSubtaskStatus: Subtask не найден " + subtaskId);
 
+        Epic epic = epics.get(subtask.getEpicId());
         if (epic == null)
             throw new RuntimeException("Ошибка updateSubtaskStatus: Epic не найден для Subtask " + subtaskId);
 
         subtask.setStatus(status);
-        refreshEpicStatusById(epic);
+        refreshEpicStatusById(epic.getId());
+        validateStackConsistency();
+    }
+
+    private Long checkIfExists(@NonNull Long id) {
+        if (tasks.containsKey(id))
+            throw new RuntimeException("Ошибка checkUniqueId: Task с идентификатором уже существует - " + id);
+
+        if (subtasks.containsKey(id))
+            throw new RuntimeException("Ошибка checkUniqueId: Subtask с идентификатором уже существует - " + id);
+
+        if (epics.containsKey(id))
+            throw new RuntimeException("Ошибка checkUniqueId: Epic с идентификатором уже существует - " + id);
+
+        return id;
     }
 }

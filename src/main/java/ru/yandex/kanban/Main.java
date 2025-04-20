@@ -1,6 +1,9 @@
 package ru.yandex.kanban;
 
-import ru.yandex.kanban.issue.*;
+import ru.yandex.kanban.issue.Epic;
+import ru.yandex.kanban.issue.Status;
+import ru.yandex.kanban.issue.Subtask;
+import ru.yandex.kanban.issue.Task;
 import ru.yandex.kanban.service.TaskManagerImpl;
 
 public class Main {
@@ -16,81 +19,111 @@ public class Main {
          */
 
         // Создайте 2 задачи,
-        taskManager.createTask(new Task(1L, "Task-1", "Task-1", Status.NEW));
-        taskManager.createTask(new Task(2L, "Task-2", "Task-2", Status.NEW));
+        Long taskId0 = taskManager.createTask(new Task("Task-0", "Task-0", Status.NEW));
+        Long taskId1 = taskManager.createTask(new Task("Task-1", null, Status.NEW));
+
         // один эпик с 2 подзадачам,
-        taskManager.createEpic(new Epic(3L, "Epic-3", "Epic-3", Status.NEW));
-        taskManager.createSubtask(new Subtask(4L, 3L ,"Subtask-4", "Subtask-4", Status.NEW));
-        taskManager.createSubtask(new Subtask(5L, 3L, "Subtask-5", "Subtask-5", Status.NEW));
+        Long epicId2 = taskManager.createEpic(new Epic("Epic-2", "Epic-2"));
+        Long subtaskId3 = taskManager.createSubtask(epicId2, new Subtask("Subtask-3",
+                "Subtask-3", Status.NEW));
+        Long subtaskId4 = taskManager.createSubtask(epicId2, new Subtask("Subtask-4",
+                "Subtask-4", Status.NEW));
+
         // а другой эпик с 1 подзадачей.
-        taskManager.createEpic(new Epic(6L, "Epic-6", "Epic-6", Status.NEW));
-        taskManager.createSubtask(new Subtask(7L, 6L, "Subtask-7", "Subtask-7", Status.NEW));
+        Long epicId5 = taskManager.createEpic(new Epic("Epic-5", "Epic-5"));
+        Long subtaskId6 = taskManager.createSubtask(epicId5, new Subtask("Subtask-6",
+                "Subtask-6", Status.NEW));
 
         // Распечатайте списки эпиков,
-        System.out.println("Список эпиков:");
-        System.out.println(taskManager.getAllEpics());
         // задач и подзадач,
-        System.out.println("Списки задач:");
-        System.out.println(taskManager.getAllTasks());
         // и подзадач через `System.out.println(..)`.
-        System.out.println("Списки подзадач:");
-        System.out.println(taskManager.getAllSubtasks());
+        System.out.println("""
+                Распечатайте списки эпиков,
+                задач и подзадач,
+                и подзадач через `System.out.println(..)`.
+                """
+        );
+        printTaskManager(taskManager);
 
         // Измените статусы созданных объектов
-        taskManager.updateTaskStatusById(1L, Status.IN_PROGRESS);
-        taskManager.updateTaskStatusById(2L, Status.DONE);
-        taskManager.updateSubtaskStatusById(4L, Status.IN_PROGRESS);
-        taskManager.updateSubtaskStatusById(5L, Status.DONE);
-        taskManager.updateSubtaskStatusById(7L, Status.DONE);
+        System.out.println("Измените статусы созданных объектов");
+        taskManager.updateTaskStatusById(taskId0, Status.IN_PROGRESS);
+        taskManager.updateTaskStatusById(taskId1, Status.DONE);
+        taskManager.updateSubtaskStatusById(subtaskId3, Status.DONE);
+        taskManager.updateSubtaskStatusById(subtaskId4, Status.IN_PROGRESS);
+        taskManager.updateSubtaskStatusById(subtaskId6, Status.DONE);
+
         // Распечатайте.
-        System.out.println("Список эпиков:");
-        System.out.println(taskManager.getAllEpics());
-        System.out.println("Списки задач:");
-        System.out.println(taskManager.getAllTasks());
-        System.out.println("Списки подзадач:");
-        System.out.println(taskManager.getAllSubtasks());
+        System.out.println("Распечатайте.");
+        printTaskManager(taskManager);
+
         // Проверьте, что статус задачи
-        if (taskManager.getTaskById(1L).getStatus() != Status.IN_PROGRESS) {
+        System.out.println("Проверьте, что статус задачи");
+        if (taskManager.getTaskById(taskId0).getStatus() != Status.IN_PROGRESS) {
             throw new IllegalStateException("Неверно обновился статус задачи");
         }
-        if (taskManager.getTaskById(2L).getStatus() != Status.DONE) {
+        if (taskManager.getTaskById(taskId1).getStatus() != Status.DONE) {
             throw new IllegalStateException("Неверно обновился статус задачи");
         }
         // и подзадачи сохранился,
-        if (taskManager.getSubtaskById(4L).getStatus() != Status.IN_PROGRESS) {
+        System.out.println("и подзадачи сохранился,");
+        if (taskManager.getSubtaskById(subtaskId3).getStatus() != Status.DONE) {
             throw new IllegalStateException("Неверно обновился статус подзадачи");
         }
-        if (taskManager.getSubtaskById(5L).getStatus() != Status.DONE) {
+        if (taskManager.getSubtaskById(subtaskId4).getStatus() != Status.IN_PROGRESS) {
             throw new IllegalStateException("Неверно обновился статус подзадачи");
         }
-        if (taskManager.getSubtaskById(7L).getStatus() != Status.DONE) {
+        if (taskManager.getSubtaskById(subtaskId6).getStatus() != Status.DONE) {
             throw new IllegalStateException("Неверно обновился статус подзадачи");
         }
         // а статус эпика рассчитался по статусам подзадач.
-        if (taskManager.getEpicById(3L).getStatus() != Status.IN_PROGRESS) {
+        System.out.println("а статус эпика рассчитался по статусам подзадач.");
+        if (taskManager.getEpicById(epicId2).getStatus() != Status.IN_PROGRESS) {
             throw new IllegalStateException("Неверно обновился статус эпика");
         }
-        if (taskManager.getEpicById(6L).getStatus() != Status.DONE) {
+        if (taskManager.getEpicById(epicId5).getStatus() != Status.DONE) {
             throw new IllegalStateException("Неверно обновился статус эпика");
         }
 
         // И, наконец, попробуйте удалить одну из задач
-        taskManager.removeTaskById(2L);
-        taskManager.removeSubtaskById(5L); // Вероятно, упущено
+        System.out.println("И, наконец, попробуйте удалить одну из задач");
+        taskManager.removeTaskById(taskId0);
         // и один из эпиков.
-        taskManager.removeEpicById(3L);
+        System.out.println("и один из эпиков.");
+        taskManager.removeEpicById(epicId5);
 
         // Смотрим, что осталось.
-        System.out.println("Список эпиков:");
-        System.out.println(taskManager.getAllEpics());
-        System.out.println("Списки задач:");
-        System.out.println(taskManager.getAllTasks());
-        System.out.println("Списки подзадач:");
-        System.out.println(taskManager.getAllSubtasks());
+        System.out.println("Смотрим, что осталось.");
+        printTaskManager(taskManager);
 
-        /*
-         * Ответ:
-         * Проверено. Все отработало штатно
-         */
+        System.out.println("""
+                Ответ:
+                Проверено. Все отработало штатно
+                """);
+
+        // Иные проверки
+        taskManager.updateTask(new Task(taskId1, null, null, Status.NEW));
+
+        Epic updatedEpic = taskManager.getEpicById(epicId2);
+        updatedEpic.setName(null);
+        updatedEpic.setDescription(null);
+        taskManager.updateEpic(updatedEpic);
+
+        printTaskManager(taskManager);
+    }
+
+    static void printTaskManager(TaskManagerImpl taskManager) {
+        System.out.println("Список Epics c Subtasks:");
+        for (Epic epic : taskManager.getAllEpics()) {
+            System.out.println(epic.getId() + ":" + epic.getName() + ":" + epic.getStatus());
+            for (Long subtaskId : epic.getDependentSubtaskIds()) {
+                Subtask subtask = taskManager.getSubtaskById(subtaskId);
+                System.out.println("\t" + subtask.getId() + ":" + subtask.getName() + ":" + subtask.getStatus());
+            }
+        }
+
+        System.out.println("Список задач:");
+        taskManager.getAllTasks().forEach(task ->
+                System.out.println(task.getId() + ":" + task.getName() + ":" + task.getStatus()));
     }
 }

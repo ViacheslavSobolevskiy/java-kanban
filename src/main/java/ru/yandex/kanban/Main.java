@@ -24,15 +24,15 @@ public class Main {
 
         // один эпик с 2 подзадачам,
         Long epicId2 = taskManager.createEpic(new Epic("Epic-2", "Epic-2"));
-        Long subtaskId3 = taskManager.createSubtask(epicId2, new Subtask("Subtask-3",
-                "Subtask-3", Status.NEW));
-        Long subtaskId4 = taskManager.createSubtask(epicId2, new Subtask("Subtask-4",
-                "Subtask-4", Status.NEW));
+        Long subtaskId3 = taskManager.createSubtask(new Subtask(epicId2,
+                "Subtask-3", "Subtask-3", Status.NEW));
+        Long subtaskId4 = taskManager.createSubtask(new Subtask(epicId2,
+                "Subtask-4", "Subtask-4", Status.NEW));
 
         // а другой эпик с 1 подзадачей.
         Long epicId5 = taskManager.createEpic(new Epic("Epic-5", "Epic-5"));
-        Long subtaskId6 = taskManager.createSubtask(epicId5, new Subtask("Subtask-6",
-                "Subtask-6", Status.NEW));
+        Long subtaskId6 = taskManager.createSubtask(new Subtask(epicId5,
+                "Subtask-6", "Subtask-6", Status.NEW));
 
         // Распечатайте списки эпиков,
         // задач и подзадач,

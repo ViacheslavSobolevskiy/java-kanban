@@ -59,7 +59,7 @@ public interface TaskManager {
     // c. Получение по идентификатору.
     Subtask getSubtaskById(@NonNull Long subtaskId);
     // d. Создание. Сам объект должен передаваться в качестве параметра.
-    Long createSubtask(@NonNull Long epicId, @NonNull Subtask subtask);
+    Long createSubtask(@NonNull Subtask subtask);
     // e. Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
     void updateSubtask(@NonNull Subtask subtask);
     // f. Удаление по идентификатору.

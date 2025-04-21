@@ -14,10 +14,6 @@ public class Epic extends Task {
         super(name, description, Status.NEW);
     }
 
-    public Epic(@NonNull Long id, String name, String description) {
-        super(id, name, description);
-    }
-
     public void addSubtaskId(Long subtaskId) {
         if (dependentSubtaskIds.contains(subtaskId))
             throw new IllegalArgumentException("addSubtaskId: Subtask уже существует " + subtaskId);

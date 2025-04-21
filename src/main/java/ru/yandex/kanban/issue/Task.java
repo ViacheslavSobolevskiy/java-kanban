@@ -27,13 +27,6 @@ public class Task {
         this.status = status;
     }
 
-    public Task(@NonNull Long id, String name, String description) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.status = Status.NEW;
-    }
-
     @Override
     public boolean equals(Object other) {
         if (this == other) return true;

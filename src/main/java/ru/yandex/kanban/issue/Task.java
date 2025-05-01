@@ -9,7 +9,7 @@ import java.util.Objects;
 @Getter
 @Setter
 public class Task {
-    private Long id;
+    private Integer id;
     private String name;
     private String description;
     private Status status;
@@ -20,11 +20,21 @@ public class Task {
         this.status = status;
     }
 
-    public Task(@NonNull Long id, String name, String description, @NonNull Status status) {
+    public Task(Integer id, String name, String description, @NonNull Status status) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                '}';
     }
 
     @Override
@@ -38,5 +48,9 @@ public class Task {
     @Override
     public int hashCode() {
         return Objects.hash(id, name, status, description);
+    }
+
+    public Task copy() {
+        return new Task(this.getId(), this.getName(), this.getDescription(), this.getStatus());
     }
 }

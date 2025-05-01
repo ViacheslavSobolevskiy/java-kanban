@@ -6,27 +6,38 @@ import ru.yandex.kanban.issue.Epic;
 import ru.yandex.kanban.issue.Status;
 import ru.yandex.kanban.issue.Subtask;
 import ru.yandex.kanban.issue.Task;
+import ru.yandex.kanban.utility.Managers;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+/**
+ * Созданный ранее класс менеджера нужно переименовать в InMemoryTaskManager. Именно то,
+ * что менеджер хранит всю информацию в оперативной памяти, и есть его главное свойство,
+ * позволяющее эффективно управлять задачами. Внутри класса должна остаться реализация методов.
+ * При этом важно не забыть имплементировать TaskManager, ведь в Java класс должен явно заявить,
+ * что он подходит под требования интерфейса.
+ * <p>
+ * Проверьте, что теперь InMemoryTaskManager обращается к менеджеру истории через интерфейс
+ * HistoryManager и использует реализацию, которую возвращает метод getDefaultHistory.
+ */
+
 @Getter
-public class TaskManagerImpl implements TaskManager {
-    private final AtomicLong uniqueId = new AtomicLong();
-    private final Map<Long, Epic> epics = new HashMap<>();
-    private final Map<Long, Task> tasks = new HashMap<>();
-    private final Map<Long, Subtask> subtasks = new HashMap<>();
+public class InMemoryTaskManager implements TaskManager {
+    private final AtomicInteger uniqueId = new AtomicInteger();
+    private final Map<Integer, Epic> epics = new HashMap<>();
+    private final Map<Integer, Task> tasks = new HashMap<>();
+    private final Map<Integer, Subtask> subtasks = new HashMap<>();
 
-    public TaskManagerImpl() {
-    }
+    private final HistoryManager historyManager = Managers.getDefaultHistory();
 
-    private void refreshEpicStatusById(@NonNull Long epicId) {
+    private void refreshEpicStatusById(Integer epicId) {
         Epic epic = epics.get(epicId);
         if (epic == null)
             throw new RuntimeException("Ошибка refreshEpicStatusById: Epic не найден " + epicId);
 
-        Set<Long> subtaskIds = epic.getDependentSubtaskIds();
+        Set<Integer> subtaskIds = epic.getDependentSubtaskIds();
 
         if (subtaskIds.isEmpty()) {
             epic.setStatus(Status.NEW);
@@ -36,7 +47,7 @@ public class TaskManagerImpl implements TaskManager {
         boolean allDone = true;
         boolean anyInProgress = false;
 
-        for (Long subtaskId : subtaskIds) {
+        for (Integer subtaskId : subtaskIds) {
             Subtask subtask = subtasks.get(subtaskId);
             if (subtask == null)
                 throw new RuntimeException("Ошибка refreshEpicStatusById: Subtask не найден " + subtaskId);
@@ -59,6 +70,20 @@ public class TaskManagerImpl implements TaskManager {
         }
     }
 
+    private void addToHistory(@NonNull Task task) {
+        historyManager.add(task);
+    }
+
+    private int generateUniqueId() {
+        int id;
+
+        do {
+            id = uniqueId.getAndIncrement();
+        } while (tasks.containsKey(id) || epics.containsKey(id) || subtasks.containsKey(id));
+
+        return id;
+    }
+
     @Override
     public void updateTask(@NonNull Task task) {
         if (task.getId() == null)
@@ -69,11 +94,11 @@ public class TaskManagerImpl implements TaskManager {
 
     @Override
     public void updateSubtask(@NonNull Subtask subtask) {
-        Long subtaskId = subtask.getId();
+        Integer subtaskId = subtask.getId();
         if (subtaskId == null)
             throw new IllegalArgumentException("Ошибка updateSubtask: Subtask не имеет идентификатора");
 
-        Long epicId = subtask.getEpicId();
+        Integer epicId = subtask.getEpicId();
         if (!epics.containsKey(epicId))
             throw new RuntimeException("Ошибка updateSubtask: Epic " + epicId +
                     "не найден для Subtask " + subtaskId);
@@ -84,7 +109,7 @@ public class TaskManagerImpl implements TaskManager {
 
     @Override
     public void updateEpic(@NonNull Epic epic) {
-        Long epicId = epic.getId();
+        Integer epicId = epic.getId();
         if (epicId == null)
             throw new IllegalArgumentException("Ошибка updateEpic: Epic не имеет идентификатора");
 
@@ -92,19 +117,19 @@ public class TaskManagerImpl implements TaskManager {
     }
 
     @Override
-    public void removeTaskById(@NonNull Long taskId) {
+    public void removeTaskById(Integer taskId) {
         if (!tasks.containsKey(taskId))
             throw new IllegalArgumentException("Ошибка removeTask: Task не найден " + taskId);
 
         tasks.remove(taskId);
     }
 
-    public void removeSubtaskById(@NonNull Long subtaskId) {
+    public void removeSubtaskById(Integer subtaskId) {
         if (!subtasks.containsKey(subtaskId))
             throw new IllegalArgumentException("Ошибка removeSubtask: Subtask не найден " + subtaskId);
 
         Subtask subtask = subtasks.get(subtaskId);
-        Long epicId = subtask.getEpicId();
+        Integer epicId = subtask.getEpicId();
         if (!epics.containsKey(epicId))
             throw new RuntimeException("Ошибка removeSubtask: Epic не найден для подзадачи " + subtaskId);
 
@@ -115,81 +140,82 @@ public class TaskManagerImpl implements TaskManager {
     }
 
     @Override
-    public void removeEpicById(@NonNull Long epicId) {
+    public void removeEpicById(Integer epicId) {
         if (!epics.containsKey(epicId))
             throw new IllegalArgumentException("Ошибка removeEpic: Epic не найден " + epicId);
 
         epics.remove(epicId).getDependentSubtaskIds().forEach(subtasks::remove);
     }
 
-    public Task getTaskById(@NonNull Long taskId) {
+    @Override
+    public Task getTaskById(Integer taskId) {
         if (!tasks.containsKey(taskId))
             throw new IllegalArgumentException("Ошибка getTask: Task не найден " + taskId);
-
-        return tasks.get(taskId);
+        Task task = tasks.get(taskId);
+        addToHistory(task);
+        return task;
     }
 
     @Override
-    public Subtask getSubtaskById(@NonNull Long subtaskId) {
+    public Subtask getSubtaskById(Integer subtaskId) {
         if (!subtasks.containsKey(subtaskId))
             throw new IllegalArgumentException("Ошибка getSubtask: Subtask не найден " + subtaskId);
-
-        return subtasks.get(subtaskId);
+        Subtask subtask = subtasks.get(subtaskId);
+        addToHistory(subtask);
+        return subtask;
     }
 
     @Override
-    public Epic getEpicById(@NonNull Long epicId) {
+    public Epic getEpicById(Integer epicId) {
         if (!epics.containsKey(epicId))
             throw new IllegalArgumentException("Ошибка getEpic: Epic не найден " + epicId);
-
-        return epics.get(epicId);
+        Epic epic = epics.get(epicId);
+        addToHistory(epic);
+        return epic;
     }
 
     @Override
-    public Long createTask(@NonNull Task task) {
-        Long taskId = task.getId();
+    public Integer createTask(@NonNull Task task) {
+        Integer taskId = task.getId();
         if (taskId != null)
             throw new IllegalArgumentException("Ошибка createTask: Task уже имеет идентификатор");
 
-        taskId = uniqueId.getAndIncrement();
-        task.setId(taskId);
-        tasks.put(taskId, task);
-
-        return taskId;
+        int newId = generateUniqueId();
+        task.setId(newId);
+        tasks.put(newId, task);
+        return newId;
     }
 
     @Override
-    public Long createSubtask(@NonNull Subtask subtask) {
-        Long subtaskId = subtask.getId();
+    public Integer createSubtask(@NonNull Subtask subtask) {
+        Integer subtaskId = subtask.getId();
         if (subtaskId != null)
             throw new IllegalArgumentException("Ошибка createSubtask: Subtask уже имеет идентификатор");
 
-        Long epicId = subtask.getEpicId();
+        Integer epicId = subtask.getEpicId();
         if (epicId == null)
             throw new IllegalArgumentException("Ошибка createSubtask: Subtask не имеет идентификатора Epic");
         if (!epics.containsKey(subtask.getEpicId()))
             throw new IllegalArgumentException("Ошибка createSubtask: Epic не найден " + epicId);
 
-        subtaskId = uniqueId.getAndIncrement();
-        subtask.setId(subtaskId);
-        subtasks.put(subtaskId, subtask);
-        epics.get(epicId).addSubtaskId(subtaskId);
+        int newId = generateUniqueId();
+        subtask.setId(newId);
+        subtasks.put(newId, subtask);
+        epics.get(epicId).addSubtaskId(newId);
         refreshEpicStatusById(epicId);
-
-        return subtaskId;
+        return newId;
     }
 
     @Override
-    public Long createEpic(@NonNull Epic epic) {
-        Long epicId = epic.getId();
+    public Integer createEpic(@NonNull Epic epic) {
+        Integer epicId = epic.getId();
         if (epicId != null)
             throw new IllegalArgumentException("Ошибка createEpic: Epic уже имеет идентификатор");
 
-        epicId = uniqueId.getAndIncrement();
-        epic.setId(epicId);
-        epics.put(epicId, epic);
-
-        return epicId;
+        int newId = generateUniqueId();
+        epic.setId(newId);
+        epics.put(newId, epic);
+        return newId;
     }
 
     public void removeAllTasks() {
@@ -226,12 +252,17 @@ public class TaskManagerImpl implements TaskManager {
     }
 
     @Override
-    public List<Subtask> getAllSubtasksByEpicId(@NonNull Long epicId) {
+    public List<Subtask> getAllSubtasksByEpicId(Integer epicId) {
         if (!epics.containsKey(epicId))
             throw new IllegalArgumentException("Ошибка getAllSubtasksByEpicId: Epic не найден " + epicId);
 
         return epics.get(epicId).getDependentSubtaskIds().stream()
                 .map(subtasks::get)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
     }
 }

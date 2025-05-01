@@ -1,13 +1,14 @@
 package ru.yandex.kanban.issue;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.kanban.service.InMemoryTaskManager;
 import ru.yandex.kanban.service.TaskManager;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class TaskTest {
     TaskManager taskManager;

@@ -83,7 +83,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void taskNotChangedAfterAddingToManager() throws CloneNotSupportedException {
+    void taskNotChangedAfterAddingToManager() {
         Task original = new Task("TestName", "TestDesc", Status.IN_PROGRESS);
         // Копия для сравнения
         Task before = original.copy();

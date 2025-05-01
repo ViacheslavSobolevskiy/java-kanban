@@ -4,8 +4,8 @@ import lombok.Getter;
 import lombok.NonNull;
 
 @Getter
-public class Subtask extends Task{
-    private Integer epicId;
+public class Subtask extends Task {
+    private final Integer epicId;
 
     public Subtask(Integer epicId, Integer id, String name, String description, @NonNull Status status) {
         super(id, name, description, status);
@@ -14,12 +14,6 @@ public class Subtask extends Task{
 
     public Subtask(Integer epicId, String name, String description, @NonNull Status status) {
         super(name, description, status);
-        this.epicId = epicId;
-    }
-
-    public void setEpicId(Integer epicId) {
-        if (epicId.equals(this.getId()))
-            throw new IllegalArgumentException("Ошибка setEpicId: Subtask не может быть связан с самим собой");
         this.epicId = epicId;
     }
 

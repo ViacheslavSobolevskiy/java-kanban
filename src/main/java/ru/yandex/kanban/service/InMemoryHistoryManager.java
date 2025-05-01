@@ -2,6 +2,7 @@ package ru.yandex.kanban.service;
 
 import lombok.NonNull;
 import ru.yandex.kanban.issue.Task;
+
 import java.util.LinkedList;
 import java.util.List;
 

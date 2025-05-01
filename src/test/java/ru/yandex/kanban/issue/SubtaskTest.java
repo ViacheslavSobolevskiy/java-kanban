@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.kanban.service.InMemoryTaskManager;
 import ru.yandex.kanban.service.TaskManager;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * 4.проверьте, что объект Subtask нельзя сделать своим же эпиком;

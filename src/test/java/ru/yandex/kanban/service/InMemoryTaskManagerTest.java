@@ -29,7 +29,7 @@ class InMemoryTaskManagerTest {
     @Test
     void createAndFindTaskById() {
         Task task1 = new Task("Задача 1", "Задача 1", Status.IN_PROGRESS);
-        Integer task1Id = taskManager.createTask(task1);
+        int task1Id = taskManager.createTask(task1);
 
         Task task2 = taskManager.getTaskById(task1Id);
 
@@ -40,7 +40,7 @@ class InMemoryTaskManagerTest {
     @Test
     void createAndFindEpicById() {
         Epic epic1 = new Epic("Эпик 1", "Эпик 1");
-        Integer epic1Id = taskManager.createEpic(epic1);
+        int epic1Id = taskManager.createEpic(epic1);
 
         Epic epic2 = taskManager.getEpicById(epic1Id);
 
@@ -51,10 +51,10 @@ class InMemoryTaskManagerTest {
     @Test
     void createAndFindSubtaskById() {
         Epic epic = new Epic("Эпик 1", null);
-        Integer epicId = taskManager.createEpic(epic);
+        int epicId = taskManager.createEpic(epic);
 
         Subtask subtask1 = new Subtask(epicId, "Subtask 1", null, Status.DONE);
-        Integer subtask1Id = taskManager.createSubtask(subtask1);
+        int subtask1Id = taskManager.createSubtask(subtask1);
 
         Subtask subtask2 = taskManager.getSubtaskById(subtask1Id);
 
@@ -90,7 +90,7 @@ class InMemoryTaskManagerTest {
         // Копия для сравнения
         Task before = original.clone();
 
-        Integer id = taskManager.createTask(original);
+        int id = taskManager.createTask(original);
         Task fromManager = taskManager.getTaskById(id);
 
         assertEquals(before.getName(), fromManager.getName(), "Имя задачи изменилось");
@@ -104,7 +104,7 @@ class InMemoryTaskManagerTest {
         Epic orig = new Epic("EpicName", "EpicDesc");
         Epic save_orig = orig.clone();
 
-        Integer id = taskManager.createEpic(orig);
+        int id = taskManager.createEpic(orig);
         Epic fromManager = taskManager.getEpicById(id);
 
         assertEquals(save_orig.getName(), fromManager.getName(), "Имя эпика изменилось");
@@ -122,7 +122,7 @@ class InMemoryTaskManagerTest {
         Subtask orig = new Subtask(epicId, "Subtask", "Subtask", Status.NEW);
         Subtask save_orig = orig.clone();
 
-        Integer id = taskManager.createSubtask(orig);
+        int id = taskManager.createSubtask(orig);
         Subtask fromManager = taskManager.getSubtaskById(id);
 
         assertEquals(save_orig.getName(), fromManager.getName(), "Имя подзадачи изменилось");

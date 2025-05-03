@@ -8,7 +8,7 @@ import java.util.Objects;
 
 @Getter
 @Setter
-public class Task {
+public class Task implements Cloneable {
     private Integer id;
     private String name;
     private String description;
@@ -39,18 +39,25 @@ public class Task {
 
     @Override
     public boolean equals(Object other) {
-        if (this == other) return true;
-        if (other == null || getClass() != other.getClass()) return false;
+        if (this == other)
+            return true;
+        if (other == null || getClass() != other.getClass())
+            return false;
         Task task = (Task) other;
         return Objects.equals(id, task.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, status, description);
+        return Objects.hash(id);
     }
 
-    public Task copy() {
-        return new Task(this.getId(), this.getName(), this.getDescription(), this.getStatus());
+    @Override
+    public Task clone() {
+        try {
+            return (Task) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException("Клонирование не поддерживается", e);
+        }
     }
 }

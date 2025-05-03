@@ -2,8 +2,8 @@ package ru.yandex.kanban.issue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.kanban.service.InMemoryTaskManager;
 import ru.yandex.kanban.service.TaskManager;
+import ru.yandex.kanban.utility.Managers;
 
 import java.util.List;
 
@@ -11,11 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class TaskTest {
-    TaskManager taskManager;
+    private TaskManager taskManager;
 
     @BeforeEach
     void setUp() {
-        taskManager = new InMemoryTaskManager();
+        taskManager = Managers.getDefault();
     }
     /**
      * 1. проверьте, что экземпляры класса Task равны друг другу, если равен их id;

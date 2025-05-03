@@ -1,13 +1,14 @@
 package ru.yandex.kanban.issue;
 
 import lombok.Getter;
+import lombok.NonNull;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 @Getter
-public class Epic extends Task {
+public class Epic extends Task implements Cloneable {
     private final Set<Integer> dependentSubtaskIds = new HashSet<>();
 
     public Epic(String name, String description) {
@@ -18,7 +19,7 @@ public class Epic extends Task {
         super(id, name, description, Status.NEW);
     }
 
-    public void addSubtaskId(Integer subtaskId) {
+    public void addSubtaskId(@NonNull Integer subtaskId) {
         if (Objects.equals(subtaskId, this.getId()))
             throw new IllegalArgumentException("addSubtaskId: Subtask не может быть Epic'ом: " + subtaskId);
 
@@ -28,7 +29,7 @@ public class Epic extends Task {
         dependentSubtaskIds.add(subtaskId);
     }
 
-    public void removeSubtaskId(Integer subtaskId) {
+    public void removeSubtaskId(@NonNull Integer subtaskId) {
         if (dependentSubtaskIds.contains(subtaskId))
             dependentSubtaskIds.remove(subtaskId);
         else
@@ -46,7 +47,8 @@ public class Epic extends Task {
                 '}';
     }
 
-    public Epic copy() {
-        return new Epic(this.getId(), this.getName(), this.getDescription());
+    @Override
+    public Epic clone() {
+        return (Epic) super.clone();
     }
 }

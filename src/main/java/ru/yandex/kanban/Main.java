@@ -1,15 +1,16 @@
 package ru.yandex.kanban;
 
+import lombok.val;
 import ru.yandex.kanban.issue.Epic;
 import ru.yandex.kanban.issue.Status;
 import ru.yandex.kanban.issue.Subtask;
 import ru.yandex.kanban.issue.Task;
-import ru.yandex.kanban.service.InMemoryTaskManager;
 import ru.yandex.kanban.service.TaskManager;
+import ru.yandex.kanban.utility.Managers;
 
 public class Main {
     public static void main(String[] args) {
-        InMemoryTaskManager taskManager = new InMemoryTaskManager();
+        val taskManager = Managers.getDefault();
 
         /*
          * Нужно реализовать тестирование из тз:
@@ -20,19 +21,19 @@ public class Main {
          */
 
         // Создайте 2 задачи,
-        Integer taskId0 = taskManager.createTask(new Task("Task-0", "Task-0", Status.NEW));
-        Integer taskId1 = taskManager.createTask(new Task("Task-1", null, Status.NEW));
+        int taskId0 = taskManager.createTask(new Task("Task-0", "Task-0", Status.NEW));
+        int taskId1 = taskManager.createTask(new Task("Task-1", null, Status.NEW));
 
         // один эпик с 2 подзадачам,
-        Integer epicId2 = taskManager.createEpic(new Epic("Epic-2", "Epic-2"));
-        Integer subtaskId3 = taskManager.createSubtask(new Subtask(epicId2,
+        int epicId2 = taskManager.createEpic(new Epic("Epic-2", "Epic-2"));
+        int subtaskId3 = taskManager.createSubtask(new Subtask(epicId2,
                 "Subtask-3", "Subtask-3", Status.NEW));
-        Integer subtaskId4 = taskManager.createSubtask(new Subtask(epicId2,
+        int subtaskId4 = taskManager.createSubtask(new Subtask(epicId2,
                 "Subtask-4", "Subtask-4", Status.NEW));
 
         // а другой эпик с 1 подзадачей.
-        Integer epicId5 = taskManager.createEpic(new Epic("Epic-5", "Epic-5"));
-        Integer subtaskId6 = taskManager.createSubtask(new Subtask(epicId5,
+        int epicId5 = taskManager.createEpic(new Epic("Epic-5", "Epic-5"));
+        int subtaskId6 = taskManager.createSubtask(new Subtask(epicId5,
                 "Subtask-6", "Subtask-6", Status.NEW));
 
         // Распечатайте списки эпиков,
@@ -48,11 +49,11 @@ public class Main {
 
         // Измените статусы созданных объектов
         System.out.println("Измените статусы созданных объектов");
-        taskManager.updateTask(new Task(taskId0, "Task-0", "Task-0" ,Status.IN_PROGRESS));
-        taskManager.updateTask(new Task(taskId1, "Task-1", "Task-1" ,Status.DONE));
-        taskManager.updateSubtask(new Subtask(epicId2, subtaskId3, "Subtask-3", "Subtask-3" ,Status.DONE));
-        taskManager.updateSubtask(new Subtask(epicId2, subtaskId4, "Subtask-4", "Subtask-4" ,Status.IN_PROGRESS));
-        taskManager.updateSubtask(new Subtask(epicId5, subtaskId6, "Subtask-6", "Subtask-6" ,Status.DONE));
+        taskManager.updateTask(new Task(taskId0, "Task-0", "Task-0", Status.IN_PROGRESS));
+        taskManager.updateTask(new Task(taskId1, "Task-1", "Task-1", Status.DONE));
+        taskManager.updateSubtask(new Subtask(epicId2, subtaskId3, "Subtask-3", "Subtask-3", Status.DONE));
+        taskManager.updateSubtask(new Subtask(epicId2, subtaskId4, "Subtask-4", "Subtask-4", Status.IN_PROGRESS));
+        taskManager.updateSubtask(new Subtask(epicId5, subtaskId6, "Subtask-6", "Subtask-6", Status.DONE));
 
         // Распечатайте.
         System.out.println("Распечатайте.");
@@ -85,6 +86,9 @@ public class Main {
         if (taskManager.getEpicById(epicId5).getStatus() != Status.DONE) {
             throw new IllegalStateException("Неверно обновился статус эпика");
         }
+
+        taskManager.getEpicById(2);
+        taskManager.getEpicById(2);
 
         // И, наконец, попробуйте удалить одну из задач
         System.out.println("И, наконец, попробуйте удалить одну из задач");

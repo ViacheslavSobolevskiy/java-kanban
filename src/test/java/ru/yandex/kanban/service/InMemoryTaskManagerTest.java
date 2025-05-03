@@ -6,6 +6,7 @@ import ru.yandex.kanban.issue.Epic;
 import ru.yandex.kanban.issue.Status;
 import ru.yandex.kanban.issue.Subtask;
 import ru.yandex.kanban.issue.Task;
+import ru.yandex.kanban.utility.Managers;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,7 +23,7 @@ class InMemoryTaskManagerTest {
 
     @BeforeEach
     void setUp() {
-        taskManager = new InMemoryTaskManager();
+        taskManager = Managers.getDefault();
     }
     
     @Test
@@ -66,7 +67,8 @@ class InMemoryTaskManagerTest {
         // Создаём задачу с id = 0
         Task task0 = new Task(0, "task0", "task", Status.NEW);
         // Добавляем через put в менеджер
-        ((InMemoryTaskManager) taskManager).getTasks().put(0, task0);
+        ((InMemoryTaskManager) taskManager).tasks.put(0, task0);
+
         // Проверяем, что задача с id = 0 существует
         assertEquals(task0, taskManager.getTaskById(0));
 
@@ -86,7 +88,7 @@ class InMemoryTaskManagerTest {
     void taskNotChangedAfterAddingToManager() {
         Task original = new Task("TestName", "TestDesc", Status.IN_PROGRESS);
         // Копия для сравнения
-        Task before = original.copy();
+        Task before = original.clone();
 
         Integer id = taskManager.createTask(original);
         Task fromManager = taskManager.getTaskById(id);
@@ -100,7 +102,7 @@ class InMemoryTaskManagerTest {
     @Test
     void epicNotChangeAfterAddingToManager() {
         Epic orig = new Epic("EpicName", "EpicDesc");
-        Epic save_orig = orig.copy();
+        Epic save_orig = orig.clone();
 
         Integer id = taskManager.createEpic(orig);
         Epic fromManager = taskManager.getEpicById(id);
@@ -118,7 +120,7 @@ class InMemoryTaskManagerTest {
         Integer epicId = taskManager.createEpic(epic);
 
         Subtask orig = new Subtask(epicId, "Subtask", "Subtask", Status.NEW);
-        Subtask save_orig = orig.copy();
+        Subtask save_orig = orig.clone();
 
         Integer id = taskManager.createSubtask(orig);
         Subtask fromManager = taskManager.getSubtaskById(id);

@@ -2,7 +2,6 @@ package ru.yandex.kanban.service;
 
 import lombok.NonNull;
 import ru.yandex.kanban.issue.Task;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,7 +17,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(@NonNull Task task) {
-        historyList.addLast(task.copy());
+        historyList.addLast(task.clone());
         if (historyList.size() > HISTORY_LIMIT) {
             historyList.removeFirst();
         }

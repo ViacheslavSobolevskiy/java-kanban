@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.kanban.issue.Status;
 import ru.yandex.kanban.issue.Task;
+import ru.yandex.kanban.utility.Managers;
 
 import java.util.List;
 
@@ -16,15 +17,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  */
 
 class HistoryManagerTest {
-    InMemoryHistoryManager historyManager;
+    private HistoryManager historyManager;
 
     @BeforeEach
     void start() {
-        historyManager = new InMemoryHistoryManager();
+        historyManager = Managers.getDefaultHistory();
     }
 
     @Test
-    void addTaskCopy_previousVersionNotEqualNewVersion() {
+    void addTaskClone_previousVersionNotEqualNewVersion() {
         Task task = new Task(1, "task", "desc", Status.NEW);
         historyManager.add(task);
 

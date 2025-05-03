@@ -2,8 +2,8 @@ package ru.yandex.kanban.issue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.kanban.service.InMemoryTaskManager;
 import ru.yandex.kanban.service.TaskManager;
+import ru.yandex.kanban.utility.Managers;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -16,7 +16,7 @@ class SubtaskTest {
 
     @BeforeEach
     void start() {
-        taskManager = new InMemoryTaskManager();
+        taskManager = Managers.getDefault();
     }
 
     @Test

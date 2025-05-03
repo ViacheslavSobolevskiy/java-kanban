@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 
 @Getter
-public class Subtask extends Task {
+public class Subtask extends Task implements Cloneable {
     private final Integer epicId;
 
     public Subtask(Integer epicId, Integer id, String name, String description, @NonNull Status status) {
@@ -28,8 +28,8 @@ public class Subtask extends Task {
                 '}';
     }
 
-    public Subtask copy() {
-        return new Subtask(this.getEpicId(), this.getId(), this.getName(),
-                this.getDescription(), this.getStatus());
+    @Override
+    public Subtask clone() {
+        return (Subtask) super.clone();
     }
 }

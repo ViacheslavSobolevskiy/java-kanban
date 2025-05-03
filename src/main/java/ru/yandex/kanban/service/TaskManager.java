@@ -23,16 +23,16 @@ public interface TaskManager {
     void removeAllTasks();
 
     // c. Получение по идентификатору.
-    Task getTaskById(Integer taskId);
+    Task getTaskById(int taskId);
 
     // d. Создание. Сам объект должен передаваться в качестве параметра.
-    Integer createTask(@NonNull Task task);
+    int createTask(@NonNull Task task);
 
     // e. Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
     void updateTask(@NonNull Task task);
 
     // f. Удаление по идентификатору.
-    void removeTaskById(Integer taskId);
+    Task removeTaskById(int taskId);
 
     // a. Получение списка всех задач.
     List<Epic> getAllEpics();
@@ -41,16 +41,16 @@ public interface TaskManager {
     void removeAllEpics();
 
     // c. Получение по идентификатору.
-    Epic getEpicById(Integer epicId);
+    Epic getEpicById(int epicId);
 
     // d. Создание. Сам объект должен передаваться в качестве параметра.
-    Integer createEpic(@NonNull Epic epic);
+    int createEpic(@NonNull Epic epic);
 
     // e. Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
     void updateEpic(@NonNull Epic epic);
 
     // f. Удаление по идентификатору.
-    void removeEpicById(Integer epicId);
+    Epic removeEpicById(int epicId);
 
     // a. Получение списка всех задач.
     List<Subtask> getAllSubtasks();
@@ -59,20 +59,20 @@ public interface TaskManager {
     void removeAllSubtasks();
 
     // c. Получение по идентификатору.
-    Subtask getSubtaskById(Integer subtaskId);
+    Subtask getSubtaskById(int subtaskId);
 
     // d. Создание. Сам объект должен передаваться в качестве параметра.
-    Integer createSubtask(@NonNull Subtask subtask);
+    int createSubtask(@NonNull Subtask subtask);
 
     // e. Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
     void updateSubtask(@NonNull Subtask subtask);
 
     // f. Удаление по идентификатору.
-    void removeSubtaskById(Integer subtaskId);
+    Subtask removeSubtaskById(int subtaskId);
 
     // Дополнительные методы:
     // a. Получение списка всех подзадач определённого эпика.
-    List<Subtask> getAllSubtasksByEpicId(Integer epicId);
+    List<Subtask> getAllSubtasksByEpicId(int epicId);
 
     // Получение списка последних просмотренных задач
     List<Task> getHistory();

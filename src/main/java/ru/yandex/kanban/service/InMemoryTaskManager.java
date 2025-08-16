@@ -29,8 +29,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     private final HistoryManager historyManager = Managers.getDefaultHistory();
 
-    // Добавлена читаемость
-    private void refreshEpicStatusById(int epicId) {
+    protected void refreshEpicStatusById(int epicId) {
         Epic epic = epics.get(epicId);
         if (epic == null)
             throw new RuntimeException("Ошибка refreshEpicStatusById: Epic не найден " + epicId);

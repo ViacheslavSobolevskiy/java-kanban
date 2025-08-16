@@ -1,14 +1,41 @@
 package ru.yandex.kanban;
 
+import ru.yandex.kanban.exception.ManagerSaveException;
 import ru.yandex.kanban.issue.Epic;
 import ru.yandex.kanban.issue.Status;
 import ru.yandex.kanban.issue.Subtask;
 import ru.yandex.kanban.issue.Task;
+import ru.yandex.kanban.service.FileBackedTaskManager;
 import ru.yandex.kanban.service.TaskManager;
 import ru.yandex.kanban.utility.Managers;
 
+import java.io.File;
+
 public class Main {
+    private static final String FILE_NAME = "tasks.csv";
+
     public static void main(String[] args) {
+        checkSprint7();
+    }
+
+    private static void printHistory(TaskManager manager, String title) {
+        System.out.println("\n--- " + title + " ---");
+        System.out.println("История просмотров:");
+        var history = manager.getHistory();
+        if (history.isEmpty())
+            System.out.println("  История пуста");
+        else {
+            for (int i = 0; i < history.size(); i++) {
+                Task task = history.get(i);
+                System.out.println("  " + (i + 1) + ". " + task.getClass().getSimpleName() +
+                        " ID=" + task.getId() + " \"" + task.getName() + "\"");
+            }
+        }
+        System.out.println("Всего в истории: " + history.size() + " элементов\n");
+    }
+
+    private static void checkSprint6() {
+        System.out.println("=== Sprint 6 ===");
         System.out.println("=== Пользовательский сценарий (необязательно) ===\n");
 
         TaskManager taskManager = Managers.getDefault();
@@ -77,19 +104,53 @@ public class Main {
         System.out.println("=== Пользовательский сценарий завершен ===");
     }
 
-    private static void printHistory(TaskManager manager, String title) {
-        System.out.println("\n--- " + title + " ---");
-        System.out.println("История просмотров:");
-        var history = manager.getHistory();
-        if (history.isEmpty())
-            System.out.println("  История пуста");
-        else {
-            for (int i = 0; i < history.size(); i++) {
-                Task task = history.get(i);
-                System.out.println("  " + (i + 1) + ". " + task.getClass().getSimpleName() +
-                        " ID=" + task.getId() + " \"" + task.getName() + "\"");
+    private static void checkSprint7() {
+        int taskId;
+        int epicId;
+        int subtaskId;
+
+        System.out.println("=== Sprint 7 ===");
+        System.out.println("=== FileBackedTaskManager ===");
+
+        File file = new File(FILE_NAME);
+        if (file.exists()) {
+            boolean result = file.delete();
+            if (!result) {
+                System.out.println("Файл не удален");
             }
         }
-        System.out.println("Всего в истории: " + history.size() + " элементов\n");
+
+        try (FileBackedTaskManager manager1 = new FileBackedTaskManager(file)) {
+            // Заводим issues.
+            taskId = manager1.createTask(new Task("Task0", "Description task0", Status.NEW));
+            epicId = manager1.createEpic(new Epic("Epic1", "Description epic1"));
+            subtaskId = manager1.createSubtask(new Subtask(epicId, "Sub Task2", "Description sub task2", Status.DONE));
+            // Обновляем статус эпика
+            Epic epic = manager1.getEpicById(epicId);
+            epic.setStatus(Status.DONE);
+            manager1.updateEpic(epic);
+            System.out.println("Первый менеджер:");
+            System.out.println("Задач: " + manager1.getAllTasks().size());
+            System.out.println("Эпиков: " + manager1.getAllEpics().size());
+            System.out.println("Подзадач: " + manager1.getAllSubtasks().size());
+        } catch (
+                Exception e) {
+            throw new ManagerSaveException("Ошибка сохранения в файл" + e.getMessage());
+        }
+
+        try (FileBackedTaskManager manager2 = FileBackedTaskManager.loadFromFile(file)) {
+            System.out.println("\nВторой менеджер (загружен из файла):");
+            System.out.println("Задач: " + manager2.getAllTasks().size());
+            System.out.println("Эпиков: " + manager2.getAllEpics().size());
+            System.out.println("Подзадач: " + manager2.getAllSubtasks().size());
+            // Проверяем, что все задачи есть в новом менеджере
+            boolean allTasksPresent = manager2.getTaskById(taskId) != null &&
+                    manager2.getEpicById(epicId) != null &&
+                    manager2.getSubtaskById(subtaskId) != null;
+            System.out.println("Issues восстановлены: " + (allTasksPresent ? "корректно" : "некорректно"));
+        } catch (
+                Exception e) {
+            System.out.println("Ошибка загрузки из файла: " + e.getMessage());
+        }
     }
 }

@@ -48,13 +48,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements AutoCl
                 }
 
                 Task task = manager.fromString(line);
-                if (task instanceof Epic) {
-                    manager.epics.put(task.getId(), (Epic) task);
-                } else if (task instanceof Subtask subtask) {
-                    manager.subtasks.put(task.getId(), subtask);
-                    subtasksToLink.add(subtask);
-                } else {
-                    manager.tasks.put(task.getId(), task);
+                switch (task.getType()) {
+                    case EPIC -> manager.epics.put(task.getId(), (Epic) task);
+                    case SUBTASK -> {
+                        Subtask subtask = (Subtask) task;
+                        manager.subtasks.put(task.getId(), subtask);
+                        subtasksToLink.add(subtask);
+                    }
+                    case TASK -> manager.tasks.put(task.getId(), task);
+                    default -> throw new IllegalArgumentException("Неизвестный тип задачи: " + task.getType());
                 }
             }
 
@@ -67,9 +69,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements AutoCl
             for (Epic epic : manager.epics.values()) {
                 manager.refreshEpicStatusById(epic.getId());
             }
-        } catch (
-                IOException e) {
-            throw new ManagerSaveException("Ошибка чтения файла", e);
+        } catch (IOException managerReadException) {
+            throw new ManagerSaveException("Ошибка чтения из файлового менеджера",
+                    managerReadException.getCause());
         }
 
         return manager;
@@ -87,6 +89,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements AutoCl
         int id = super.createEpic(epic);
         save();
         return id;
+    }
+
+    @Override
+    protected void refreshEpicStatusById(int epicId) {
+        super.refreshEpicStatusById(epicId);
     }
 
     @Override
@@ -167,22 +174,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements AutoCl
             }
 
             Files.write(file.toPath(), lines, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка сохранения в файл", e);
+        } catch (IOException managerSaveException) {
+            throw new ManagerSaveException("Ошибка сохранения в файл", managerSaveException.getCause());
         }
     }
 
     private String toString(Task task) {
-        TaskType type;
+        TaskType type = task.getType();
         String epicId = "";
-
-        if (task instanceof Epic) {
-            type = TaskType.EPIC;
-        } else if (task instanceof Subtask) {
-            type = TaskType.SUBTASK;
+        if (type == TaskType.SUBTASK) {
             epicId = String.valueOf(((Subtask) task).getEpicId());
-        } else {
-            type = TaskType.TASK;
         }
 
         return String.join(",",
@@ -224,7 +225,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements AutoCl
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         save();
     }
 }

@@ -133,9 +133,9 @@ public class Main {
             System.out.println("Задач: " + manager1.getAllTasks().size());
             System.out.println("Эпиков: " + manager1.getAllEpics().size());
             System.out.println("Подзадач: " + manager1.getAllSubtasks().size());
-        } catch (
-                Exception e) {
-            throw new ManagerSaveException("Ошибка сохранения в файл" + e.getMessage());
+        } catch (Exception managerSaveException) {
+            throw new ManagerSaveException("Ошибка сохранения в файл" +
+                    managerSaveException.getMessage());
         }
 
         try (FileBackedTaskManager manager2 = FileBackedTaskManager.loadFromFile(file)) {
@@ -148,9 +148,8 @@ public class Main {
                     manager2.getEpicById(epicId) != null &&
                     manager2.getSubtaskById(subtaskId) != null;
             System.out.println("Issues восстановлены: " + (allTasksPresent ? "корректно" : "некорректно"));
-        } catch (
-                Exception e) {
-            System.out.println("Ошибка загрузки из файла: " + e.getMessage());
+        } catch (Exception managerSaveException) {
+            System.out.println("Ошибка загрузки из файла: " + managerSaveException.getMessage());
         }
     }
 }

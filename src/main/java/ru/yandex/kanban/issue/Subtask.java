@@ -18,6 +18,11 @@ public class Subtask extends Task implements Cloneable {
     }
 
     @Override
+    public TaskType getType() {
+        return TaskType.SUBTASK;
+    }
+
+    @Override
     public String toString() {
         return "Subtask{" +
                 "id=" + this.getId() +

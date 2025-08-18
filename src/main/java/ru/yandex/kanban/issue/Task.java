@@ -53,6 +53,10 @@ public class Task implements Cloneable {
         this.status = status;
     }
 
+    public TaskType getType() {
+        return TaskType.TASK;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -82,8 +86,9 @@ public class Task implements Cloneable {
     public Task clone() {
         try {
             return (Task) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException("Клонирование не поддерживается", e);
+        } catch (CloneNotSupportedException exceptionCloneSupport) {
+            throw new RuntimeException("Клонирование не поддерживается: "
+                    + exceptionCloneSupport.getMessage());
         }
     }
 }

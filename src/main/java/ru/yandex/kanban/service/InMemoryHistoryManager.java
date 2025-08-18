@@ -1,11 +1,10 @@
 package ru.yandex.kanban.service;
 
-import ru.yandex.kanban.issue.Task;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import ru.yandex.kanban.issue.Task;
 
 /**
  * Объявите класс InMemoryHistoryManager и перенесите в него часть кода для работы с

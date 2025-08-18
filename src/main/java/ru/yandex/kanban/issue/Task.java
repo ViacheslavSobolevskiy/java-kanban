@@ -87,8 +87,8 @@ public class Task implements Cloneable {
         try {
             return (Task) super.clone();
         } catch (CloneNotSupportedException exceptionCloneSupport) {
-            throw new RuntimeException("Клонирование не поддерживается",
-                    exceptionCloneSupport.getCause());
+            throw new RuntimeException("Клонирование не поддерживается: "
+                    + exceptionCloneSupport.getMessage());
         }
     }
 }

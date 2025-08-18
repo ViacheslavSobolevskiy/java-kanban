@@ -70,8 +70,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements AutoCl
                 manager.refreshEpicStatusById(epic.getId());
             }
         } catch (IOException managerReadException) {
-            throw new ManagerSaveException("Ошибка чтения из файлового менеджера",
-                    managerReadException.getCause());
+            throw new ManagerSaveException("Ошибка чтения из файлового менеджера: "
+                    + managerReadException.getMessage());
         }
 
         return manager;
@@ -175,7 +175,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements AutoCl
 
             Files.write(file.toPath(), lines, StandardCharsets.UTF_8);
         } catch (IOException managerSaveException) {
-            throw new ManagerSaveException("Ошибка сохранения в файл", managerSaveException.getCause());
+            throw new ManagerSaveException("Ошибка сохранения в файл: " + managerSaveException.getMessage());
         }
     }
 
